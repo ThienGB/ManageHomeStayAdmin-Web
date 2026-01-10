@@ -1,7 +1,7 @@
+import api, { mainApi } from '@/utils/api';
 import { User } from '@auth/user';
 import UserModel from '@auth/user/models/UserModel';
 import { PartialDeep } from 'type-fest';
-import api, { mainApi } from '@/utils/api';
 
 type AuthResponse = {
 	user: User;
@@ -9,7 +9,26 @@ type AuthResponse = {
 		accessToken: string;
 		refreshToken: string;
 		expiresIn: number;
-	}
+	};
+};
+
+/**
+ * Mock user data for when API doesn't return user
+ */
+export const MOCK_USER: User = {
+	id: '18035',
+	role: ['admin'],
+	displayName: 'Admin User',
+	name: 'Admin User',
+	email: 'admin@homestay.com',
+	gender: 'male',
+	photoURL: '/assets/images/avatars/brian-hughes.jpg',
+	shortcuts: ['apps.calendar', 'apps.mailbox', 'apps.contacts'],
+	settings: {
+		layout: {},
+		theme: {}
+	},
+	loginRedirectUrl: '/'
 };
 
 /**
@@ -24,12 +43,17 @@ export async function authRefreshToken(): Promise<Response> {
 /**
  * Sign in with token
  */
+//TODO: implement authSignInWithToken
 export async function authSignInWithToken(accessToken: string): Promise<AuthResponse> {
-	const res = await mainApi.get('auth/login/access-token', {
-		headers: { Authorization: `Bearer ${accessToken}` }
-	}).json<{ success: boolean; message: string; data: any }>();
-	
-	const user = res.data.user;
+	// const res = await mainApi
+	// 	.post('accounts/refresh-token', {
+	// 		json: { refreshToken: accessToken }
+	// 	})
+	// 	.json<{ success: boolean; message: string; data: any }>();
+
+	// Use mock user if API doesn't return user data
+	// const user = res.data.user || MOCK_USER;
+	const user = MOCK_USER;
 	const transformedUser: User = {
 		...user,
 		role: ['admin'],
@@ -38,39 +62,42 @@ export async function authSignInWithToken(accessToken: string): Promise<AuthResp
 		settings: user.settings || {},
 		loginRedirectUrl: user.loginRedirectUrl || '/'
 	};
-	
-	return  {
+
+	return {
 		user: transformedUser,
-		tokens: res.data.tokens
+		// tokens: res.data.tokens
+		tokens: {
+			accessToken,
+			refreshToken: accessToken,
+			expiresIn: 3600
+		}
 	};
 }
 
 /**
  * Sign in
  */
-export async function authSignIn(
-  credentials: { username: string; password: string }
-): Promise<AuthResponse> {
-  const res = await mainApi
-    .post('accounts/login', { json: credentials })
-    .json<{ success: boolean; message: string; data: AuthResponse }>();
+export async function authSignIn(credentials: { username: string; password: string }): Promise<AuthResponse> {
+	const res = await mainApi
+		.post('accounts/login', { json: credentials })
+		.json<{ success: boolean; message: string; data: AuthResponse }>();
 
-  const user = res.data.user as any;
-  const transformedUser: User = {
-    ...user,
-    role: ['admin'],
-    displayName: user.name || user.displayName,
-    shortcuts: user.shortcuts || [],
-    settings: user.settings || {},
-    loginRedirectUrl: user.loginRedirectUrl || '/'
-  };
+	// Use mock user if API doesn't return user data
+	const user = res.data.user || MOCK_USER;
+	const transformedUser: User = {
+		...user,
+		role: ['admin'],
+		displayName: user.name || user.displayName,
+		shortcuts: user.shortcuts || [],
+		settings: user.settings || {},
+		loginRedirectUrl: user.loginRedirectUrl || '/'
+	};
 
-  return {
-    user: transformedUser,
-    tokens: res.data.tokens
-  }; 
+	return {
+		user: transformedUser,
+		tokens: res.data.tokens
+	};
 }
-
 
 /**
  * Sign up
