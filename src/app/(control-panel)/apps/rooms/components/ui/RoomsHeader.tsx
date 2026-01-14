@@ -240,7 +240,6 @@ function RoomsHeader({ totalResults, isLoading }: RoomsHeaderProps) {
 										setSearchInput('');
 										setCityInput('');
 										setAmenitySearch('');
-										setCategorySearch('');
 										setPriceRange([0, 1000000]);
 										setPagination({ page: 1, limit: 10 });
 									}}

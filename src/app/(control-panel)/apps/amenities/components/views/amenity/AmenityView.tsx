@@ -18,7 +18,6 @@ import { useAmenity } from '../../../api/hooks/useAmenity';
 import AmenityModel from '../../../api/models/AmenityModel';
 import { TextField, Autocomplete, FormControl, FormLabel } from '@mui/material';
 import { Controller } from 'react-hook-form';
-import { useAmenityCategories } from '../../../api/hooks/useAmenityCategories';
 import IconSearchField from '../../ui/IconSearchField';
 
 const schema = z.object({

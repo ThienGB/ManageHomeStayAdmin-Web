@@ -70,7 +70,7 @@ function UserMenu(props: UserMenuProps) {
 						})}
 						className={clsx('avatar h-10 w-10', dense && 'h-8 w-8')}
 					>
-						{user?.displayName?.[0]}
+						{user?.name?.[0]}
 					</Avatar>
 				)}
 				{!onlyAvatar && (
@@ -83,7 +83,7 @@ function UserMenu(props: UserMenuProps) {
 									dense ? 'text-md' : 'text-base'
 								)}
 							>
-								{user?.displayName}
+								{user?.name}
 							</Typography>
 							<Typography
 								className={clsx(
