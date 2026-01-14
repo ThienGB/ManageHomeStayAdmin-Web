@@ -385,9 +385,9 @@ class FuseUtils {
 		/*
             Check if user role is array,
             */
-		if (userRole && Array.isArray(authArr) && Array.isArray(userRole)) {
-			return authArr.some((r: string) => userRole.indexOf(r) >= 0);
-		}
+		// if (userRole && Array.isArray(authArr) && Array.isArray(userRole)) {
+		// 	return authArr.some((r: string) => userRole.indexOf(r) >= 0);
+		// }
 
 		if (typeof userRole === 'string' && Array.isArray(authArr)) {
 			return authArr?.includes?.(userRole);

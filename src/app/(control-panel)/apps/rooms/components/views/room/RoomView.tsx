@@ -445,6 +445,54 @@ function RoomView() {
 											)}
 										/>
 									</Grid>
+									<Grid size={{ sm: 12, md: 12 }}>
+										<Controller
+											name="capacity"
+											control={control}
+											render={({ field }) => (
+												<TextField
+													{...field}
+													label="Room Capacity"
+													fullWidth
+													required
+													error={!!errors.capacity}
+													helperText={errors.capacity?.message as string}
+												/>
+											)}
+										/>
+									</Grid>
+									<Grid size={{ sm: 12, md: 12 }}>
+										<Controller
+											name="bed"
+											control={control}
+											render={({ field }) => (
+												<TextField
+													{...field}
+													label="Number of Beds"
+													fullWidth
+													required
+													error={!!errors.bed}
+													helperText={errors.bed?.message as string}
+												/>
+											)}
+										/>
+									</Grid>
+									<Grid size={{ sm: 12, md: 12 }}>
+										<Controller
+											name="area"
+											control={control}
+											render={({ field }) => (
+												<TextField
+													{...field}
+													label="Area"
+													fullWidth
+													required
+													error={!!errors.area}
+													helperText={errors.area?.message as string}
+												/>
+											)}
+										/>
+									</Grid>
 								</Grid>
 							</div>
 							<Divider />
