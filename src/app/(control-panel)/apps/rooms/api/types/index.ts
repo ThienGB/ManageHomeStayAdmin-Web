@@ -38,6 +38,15 @@ export type RoomCategory = {
 	description?: string;
 };
 
+export type TimeSlot = {
+	id: string;
+	openTime?: string;
+	closeTime?: string;
+	isOvernight?: boolean;
+	createdAt?: string;
+	updatedAt?: string;
+};
+
 // Backwards compatibility aliases
 export type Attraction = Room;
 export type AttractionCategory = RoomCategory;

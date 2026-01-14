@@ -12,8 +12,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import {
 	Controller,
 	FormProvider,
-	useFieldArray,
-	useForm,
+	useForm
 } from "react-hook-form";
 import { z } from "zod";
 import { useRoom } from "../../../api/hooks/useRoom";
@@ -35,6 +34,7 @@ import Grid from "@mui/material/Grid";
 import { useAmenities } from "../../../api/hooks/useAmenities";
 import { useCreateRoom } from "../../../api/hooks/useCreateRoom";
 import { useUpdateRoom } from "../../../api/hooks/useUpdateRoom";
+import TimeSlotModel from "../../../api/models/TimeSlotModel";
 
 const schema = z
 	.object({
@@ -45,19 +45,6 @@ const schema = z
 		price: z.number().min(0, "Price must be positive"),
 		status: z.enum(["PENDING", "APPROVED", "REJECTED"]),
 		amenities: z.array(z.string()).optional(),
-		operatingHour: z
-			.array(
-				z.object({
-					day: z.string().optional(),
-					startDay: z.string().optional(),
-					endDay: z.string().optional(),
-					openTime: z.string().optional(),
-					closeTime: z.string().optional(),
-					isFullDay: z.boolean().optional(),
-					_id: z.string().optional(),
-				})
-			)
-			.optional(),
 	})
 	.passthrough(); // Allow additional fields
 
@@ -72,6 +59,7 @@ function RoomView() {
 
 	const isCreateMode = (roomId || '').toLowerCase() === 'new';
 	const [isEditMode, setIsEditMode] = useState(isCreateMode);
+	const [timeSlots, setTimeSlots] = useState([]);
 	const [currentImageIndex, setCurrentImageIndex] = useState(0);
 	const [amenitySearch, setAmenitySearch] = useState("");
 
@@ -95,14 +83,6 @@ function RoomView() {
 		watch,
 		formState: { errors },
 	} = methods;
-	const {
-		fields: operatingHourFields,
-		append: appendHour,
-		remove: removeHour,
-	} = useFieldArray<FormValues>({
-		control,
-		name: "operatingHour",
-	});
 
 	useEffect(() => {
 		if (room) {
@@ -119,6 +99,7 @@ function RoomView() {
 	}, [room, reset]);
 
 	const statusColor = room?.isActive ? "success" : "error"
+
 
 	const handleSave = (data: any) => {
 		if (isCreateMode) {
@@ -205,7 +186,7 @@ function RoomView() {
 
 				{!isEditMode ? (
 					/* VIEW MODE */
-					<div className="space-y-8">
+					<div className="space-y-8 w-full">
 						{/* Hero Section */}
 						<Paper
 							elevation={0}
@@ -350,16 +331,27 @@ function RoomView() {
 								/>
 							</div>
 						</Paper>
-
-						<Grid container spacing={4}>
-							<Grid item xs={12} md={12}>
+						<Grid container spacing={4} className="w-full">
+							<Grid size={{sm: 12, md: 12}}>
 								{/* About This Room */}
-								<Paper className="mb-4 p-6" elevation={1}>
+								<Paper className="mb-4 p-6 w-full" elevation={1}>
 									<Typography
 										variant="h5"
 										className="mb-4 font-bold"
 									>
 										About This Room
+									</Typography>
+									<Typography
+										variant="body1"
+										className="leading-relaxed text-gray-700 dark:text-gray-300"
+									>
+										{room?.capacity}
+									</Typography>
+									<Typography
+										variant="body1"
+										className="leading-relaxed text-gray-700 dark:text-gray-300"
+									>
+										{room?.description}
 									</Typography>
 									<Typography
 										variant="body1"
@@ -380,7 +372,7 @@ function RoomView() {
 										</Typography>
 										<Grid container spacing={3}>
 											{room.amenities.map((amenity, idx) => (
-												<Grid key={idx} item xs={12} sm={12}>
+												<Grid key={idx} size={{sm: 12, md: 12}}>
 													<div className="flex items-center gap-2">
 														<div className="bg-primary/10 flex h-8 w-8 items-center justify-center rounded-full">
 															<FuseSvgIcon size={16} className="text-primary">
@@ -414,7 +406,7 @@ function RoomView() {
 									Basic Information
 								</Typography>
 								<Grid container spacing={3}>
-									<Grid item xs={12}>
+									<Grid size={{sm: 12, md: 12}}>
 										<Controller
 											name="name"
 											control={control}
@@ -433,7 +425,7 @@ function RoomView() {
 											)}
 										/>
 									</Grid>
-									<Grid item xs={12}>
+									<Grid size={{sm: 12}}>
 										<Controller
 											name="description"
 											control={control}
@@ -467,7 +459,7 @@ function RoomView() {
 									Amenities
 								</Typography>
 									<Grid container spacing={3}>
-										<Grid item xs={12} md={12}>
+										<Grid size={{sm: 12, md: 12}}>
 											<Controller
 												name="amenities"
 												control={control}
@@ -480,7 +472,7 @@ function RoomView() {
 																	const checked = currentIds.includes(amenity.id);
 
 																	return (
-																		<Grid key={amenity.id || amenity._id || amenity.name} item xs={12} sm={12}>
+																		<Grid key={amenity.id || amenity._id || amenity.name} size={{sm: 12, md: 12}}>
 																			<FormControlLabel
 																				control={
 																					<Checkbox
@@ -528,19 +520,21 @@ function RoomView() {
 												lucide:plus
 											</FuseSvgIcon>
 										}
-										onClick={() =>
-											appendHour({
-												openTime: "09:00",
-												closeTime: "17:00",
-											})
-										}
+										// onClick={() =>
+										// 	appendHour(
+										// 		TimeSlotModel({
+										// 			openTime: "09:00",
+										// 			closeTime: "17:00",
+										// 		})
+										// 	)
+										// }
 									>
 										Add Time Slot
 									</Button>
 								</div>
 
 								<div className="space-y-4">
-									{operatingHourFields.map((field, index) => (
+									{timeSlots.map((field, index) => (
 										<Paper
 											key={field.id}
 											className="bg-gray-50 p-4 dark:bg-gray-900"
@@ -549,7 +543,7 @@ function RoomView() {
 											<div className="flex items-start gap-3">
 												<div className="flex-1">
 													<Grid container spacing={2}>
-														<Grid item xs={12} md={6}>
+														<Grid size={{sm: 12, md: 6}}>
 															<Controller
 																name={`operatingHour.${index}.isFullDay`}
 																control={
@@ -568,12 +562,12 @@ function RoomView() {
 																				}
 																			/>
 																		}
-																		label="Open 24 hours"
+																		label="Overnight"
 																	/>
 																)}
 															/>
 														</Grid>
-														<Grid item xs={12} md={6}>
+														<Grid size={{sm: 12, md: 6}}>
 															<Controller
 																name={`operatingHour.${index}.openTime`}
 																control={
@@ -598,11 +592,7 @@ function RoomView() {
 																)}
 															/>
 														</Grid>
-														<Grid
-															item
-															xs={12}
-															md={6}
-														>
+														<Grid size={{sm: 12, md: 12}}>
 															<Controller
 																name={`operatingHour.${index}.closeTime`}
 																control={
@@ -627,11 +617,7 @@ function RoomView() {
 																)}
 															/>
 														</Grid>
-														<Grid
-															item
-															xs={12}
-															md={6}
-														>
+														<Grid size={{sm: 12, md: 6}}>
 															<Controller
 																name={`operatingHour.${index}.Price`}
 																control={
@@ -658,9 +644,9 @@ function RoomView() {
 												<IconButton
 													size="small"
 													color="error"
-													onClick={() =>
-														removeHour(index)
-													}
+													// onClick={() =>
+													// 	removeHour(index)
+													// }
 												>
 													<FuseSvgIcon>
 														lucide:trash-2
