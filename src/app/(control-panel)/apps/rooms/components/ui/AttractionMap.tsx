@@ -45,7 +45,7 @@ function AttractionMap(props: AttractionMapProps) {
 				zoomControl: true,
 			}}
 		>
-			<Marker 
+			<Marker
 				position={center}
 				title={name}
 			/>

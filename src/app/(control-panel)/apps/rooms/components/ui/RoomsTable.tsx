@@ -1,25 +1,25 @@
-import { useMemo } from 'react';
-import { type MRT_ColumnDef } from 'material-react-table';
-import DataTable from 'src/components/data-table/DataTable';
 import FuseLoading from '@fuse/core/FuseLoading';
-import { Chip, ListItemIcon, MenuItem, Paper, Rating } from '@mui/material';
 import FuseSvgIcon from '@fuse/core/FuseSvgIcon';
 import Link from '@fuse/core/Link';
+import { Chip, ListItemIcon, MenuItem, Paper, Rating } from '@mui/material';
 import Typography from '@mui/material/Typography';
-import { useAttractions } from '../../api/hooks/useAttractions';
-import { Attraction } from '../../api/types';
-import { useAttractionsAppContext } from '../../context/attractions-context/useAttractionsAppContext';
+import { type MRT_ColumnDef } from 'material-react-table';
+import { useMemo } from 'react';
+import DataTable from 'src/components/data-table/DataTable';
+import { useRooms } from '../../api/hooks/useRooms';
+import { Room } from '../../api/types';
+import { useRoomsAppContext } from '../../context/rooms-context/useRoomsAppContext';
 
-function AttractionsTable() {
-	const { pagination, setPagination, filters } = useAttractionsAppContext();
+function RoomsTable() {
+	const { pagination, setPagination, filters } = useRoomsAppContext();
 	
-	const { data, isLoading } = useAttractions({
+	const { data, isLoading } = useRooms({
 		...pagination,
 		...filters
 	});
-	const attractions = data?.data?.content || [];
+	const rooms = data?.data?.content || [];
 
-	const columns = useMemo<MRT_ColumnDef<Attraction>[]>(
+	const columns = useMemo<MRT_ColumnDef<Room>[]>(
 		() => [
 			{
 				accessorFn: (row) => row.images?.[0],
@@ -34,7 +34,7 @@ function AttractionsTable() {
 						{row.original?.images?.length > 0 ? (
 							<img
 								className="block max-h-9 w-full max-w-9 rounded-sm"
-								src={row.original.images[0]}
+								src={row.original.images[0].url}
 								alt={row.original.name}
 							/>
 						) : (
@@ -53,7 +53,7 @@ function AttractionsTable() {
 				Cell: ({ row }) => (
 					<Typography
 						component={Link}
-						to={`/apps/attractions/${row.original.id}`}
+						to={`/apps/rooms/${row.original.id}`}
 						role="button"
 					>
 						<u>{row.original.name}</u>
@@ -61,56 +61,13 @@ function AttractionsTable() {
 				)
 			},
 			{
-				accessorKey: 'location',
-				header: 'Location',
-				Cell: ({ row }) => (
-					<span>{row.original.location.city}</span>
-				)
-			},
-			{
-				accessorKey: 'contact',
-				header: 'Contact',
-				Cell: ({ row }) => (
-					<span>{row.original.contact.phone}</span>
-				)
-			},
-			{
-				accessorKey: 'averageRating',
-				header: 'Rating',
-				Cell: ({ row }) => (
-					<div className="flex items-center gap-1">
-						<Rating
-							value={row.original.averageRating}
-							precision={0.1}
-							readOnly
-							size="small"
-						/>
-						<Typography
-							variant="body2"
-							color="text.secondary"
-						>
-							({row.original.totalRatings})
-						</Typography>
-					</div>
-				)
-			},
-			{
-				accessorKey: 'price',
-				header: 'Price',
-				Cell: ({ row }) => (
-					<span>
-						{row.original.price.toLocaleString('vi-VN')} VND
-					</span>
-				)
-			},
-			{
 				accessorKey: 'status',
 				header: 'Status',
 				Cell: ({ row }) => (
 					<Chip
-						label={row.original.status}
+						label={row.original.isActive ? 'ACTIVE' : 'INACTIVE'}
 						size="small"
-						color={row.original.status === 'PENDING' ? 'warning' : 'success'}
+						color={row.original.isActive ? 'success' : 'warning'}
 					/>
 				)
 			}
@@ -128,7 +85,7 @@ function AttractionsTable() {
 			elevation={2}
 		>
 			<DataTable
-				data={attractions}
+				data={rooms}
 				columns={columns}
 				manualPagination
 				rowCount={data?.data?.totalElements ?? 0}
@@ -173,4 +130,4 @@ function AttractionsTable() {
 	);
 }
 
-export default AttractionsTable;
+export default RoomsTable;

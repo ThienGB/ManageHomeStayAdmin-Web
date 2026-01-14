@@ -92,7 +92,7 @@ function AmenityHeader() {
 								className="mx-1 whitespace-nowrap"
 								variant="contained"
 								color="secondary"
-								disabled={_.isEmpty(dirtyFields) || !isValid}
+								disabled={_.isEmpty(dirtyFields)}
 								onClick={handleSaveAmenity}
 							>
 								Save
@@ -103,7 +103,7 @@ function AmenityHeader() {
 							className="mx-1 whitespace-nowrap"
 							variant="contained"
 							color="secondary"
-							disabled={_.isEmpty(dirtyFields) || !isValid}
+							disabled={_.isEmpty(dirtyFields)}
 							onClick={handleCreateAmenity}
 						>
 							Add

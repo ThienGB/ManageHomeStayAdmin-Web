@@ -16,7 +16,7 @@ export const useDeleteAmenity = (pagination?: Pagination, options: UseDeleteAmen
 	return useMutation({
 		mutationFn: (id: string) => amenitiesApi.deleteAmenity(id),
 		onSuccess: () => {
-			queryClient.invalidateQueries({ queryKey: amenitiesQueryKey(pagination) });
+			queryClient.invalidateQueries({ queryKey: amenitiesQueryKey() });
 			if (showToast) {
 				enqueueSnackbar('Amenity deleted successfully', { variant: 'success' });
 			}

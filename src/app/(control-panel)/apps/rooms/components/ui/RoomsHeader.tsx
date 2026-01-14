@@ -1,57 +1,44 @@
-import Button from '@mui/material/Button';
-import Typography from '@mui/material/Typography';
-import { motion } from 'motion/react';
 import FuseSvgIcon from '@fuse/core/FuseSvgIcon';
 import NavLinkAdapter from '@fuse/core/NavLinkAdapter';
-import PageBreadcrumb from 'src/components/PageBreadcrumb';
-import { 
-	TextField, 
-	MenuItem, 
-	Select, 
-	FormControl, 
-	InputLabel, 
-	InputAdornment, 
-	Autocomplete,
-	Checkbox,
-	Chip,
-	Paper,
-	Divider,
-	Collapse,
-	IconButton,
-	Tooltip,
+import {
 	Badge,
+	Box,
+	Chip,
+	Collapse,
+	Divider,
+	FormControl,
+	IconButton,
+	InputAdornment,
+	InputLabel,
+	MenuItem,
+	Paper,
 	Rating,
+	Select,
 	Slider,
-	Box
+	TextField,
+	Tooltip
 } from '@mui/material';
-import { useAttractionsAppContext } from '../../context/attractions-context/useAttractionsAppContext';
-import { useState, useCallback, useEffect, useMemo } from 'react';
-import { useAmenitiesForFilter } from '../../api/hooks/useAmenitiesForFilter';
-import { useAmenityCategoriesForFilter } from '../../api/hooks/useAmenityCategoriesForFilter';
+import Button from '@mui/material/Button';
+import Typography from '@mui/material/Typography';
 import { debounce } from 'lodash';
+import { motion } from 'motion/react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import PageBreadcrumb from 'src/components/PageBreadcrumb';
+import { useRoomsAppContext } from '../../context/rooms-context/useRoomsAppContext';
 
-type AttractionsHeaderProps = {
+type RoomsHeaderProps = {
 	totalResults?: number;
 	isLoading?: boolean;
 };
 
-function AttractionsHeader({ totalResults, isLoading }: AttractionsHeaderProps) {
-	const { filters, setFilters, resetFilters, setPagination } = useAttractionsAppContext();
-	const [amenityCategoryId, setAmenityCategoryId] = useState(null);
+function RoomsHeader({ totalResults, isLoading }: RoomsHeaderProps) {
+	const { filters, setFilters, resetFilters, setPagination } = useRoomsAppContext();
 	// Local state for debounced search
 	const [searchInput, setSearchInput] = useState(filters.search || '');
 	const [cityInput, setCityInput] = useState(filters.city || '');
 	const [amenitySearch, setAmenitySearch] = useState('');
-	const [categorySearch, setCategorySearch] = useState('');
 	const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
 	const [priceRange, setPriceRange] = useState<number[]>([filters.minPrice || 0, filters.maxPrice || 1000000]);
-
-	// Fetch data for autocompletes
-	const { data: amenitiesData } = useAmenitiesForFilter(amenitySearch, filters.amenityCategoryId);
-	const { data: categoriesData } = useAmenityCategoriesForFilter(categorySearch);
-
-	const amenities = amenitiesData?.data?.content || [];
-	const categories = categoriesData?.data?.content || [];
 
 	// Count active filters
 	const activeFiltersCount = useMemo(() => {
@@ -108,7 +95,7 @@ function AttractionsHeader({ totalResults, isLoading }: AttractionsHeaderProps) 
 							animate={{ x: 0, transition: { delay: 0.2 } }}
 						>
 							<Typography className="text-4xl leading-none font-extrabold tracking-tight">
-								Attractions
+								Rooms
 							</Typography>
 						</motion.span>
 						{totalResults !== undefined && (
@@ -141,7 +128,7 @@ function AttractionsHeader({ totalResults, isLoading }: AttractionsHeaderProps) 
 								variant="contained"
 								color="secondary"
 								component={NavLinkAdapter}
-								to="/apps/attractions/new"
+								to="/apps/rooms/new"
 								startIcon={<FuseSvgIcon>lucide:plus</FuseSvgIcon>}
 							>
 								Add
@@ -170,7 +157,7 @@ function AttractionsHeader({ totalResults, isLoading }: AttractionsHeaderProps) 
 					<div className="flex flex-wrap gap-3 items-center">
 						{/* Primary Search */}
 						<TextField
-							placeholder="Search attractions..."
+							placeholder="Search rooms..."
 							value={searchInput}
 							onChange={(e) => setSearchInput(e.target.value)}
 							size="medium"
@@ -317,111 +304,6 @@ function AttractionsHeader({ totalResults, isLoading }: AttractionsHeaderProps) 
 									<FuseSvgIcon size={18}>lucide:layers</FuseSvgIcon>
 									Amenities
 								</Typography>
-								<div className="flex flex-wrap gap-3">
-									<Autocomplete
-										size="small"
-										className="w-72"
-										options={categories}
-										getOptionLabel={(option) => option.name}
-										isOptionEqualToValue={(option, value) => option.id === value.id}
-										value={categories.find(c => c.id === amenityCategoryId) || null}
-										onChange={(_, newValue) => {
-											setAmenityCategoryId(newValue?.id || '');
-											handleFilterChange('amenityIds', []);
-										}}
-										onInputChange={(_, value) => setCategorySearch(value)}
-										sx={{
-											'& .MuiOutlinedInput-root': {
-												borderRadius: '8px',
-											}
-										}}
-										renderInput={(params) => (
-											<TextField
-												{...params}
-												label="Category"
-												placeholder="Select category first"
-												InputProps={{
-													...params.InputProps,
-													startAdornment: (
-														<>
-															<InputAdornment position="start">
-																<FuseSvgIcon size={18} color="action">lucide:folder</FuseSvgIcon>
-															</InputAdornment>
-															{params.InputProps.startAdornment}
-														</>
-													),
-												}}
-											/>
-										)}
-									/>
-
-									<Autocomplete
-										multiple
-										size="small"
-										className="flex-1 min-w-[300px]"
-										options={amenities}
-										disabled={!amenityCategoryId}
-										disableCloseOnSelect
-										getOptionLabel={(option) => option.name}
-										isOptionEqualToValue={(option, value) => option.id === value.id}
-										value={amenities.filter(a => filters.amenityIds?.includes(a.id))}
-										onChange={(_, newValue) => {
-											handleFilterChange('amenityIds', newValue.map(v => v.id));
-										}}
-										onInputChange={(_, value) => setAmenitySearch(value)}
-										sx={{
-											'& .MuiOutlinedInput-root': {
-												borderRadius: '8px',
-											}
-										}}
-										renderOption={(props, option, { selected }) => (
-											<li {...props}>
-												<Checkbox
-													icon={<FuseSvgIcon size={20}>lucide:circle</FuseSvgIcon>}
-													checkedIcon={<FuseSvgIcon size={20}>lucide:check-circle-2</FuseSvgIcon>}
-													style={{ marginRight: 8 }}
-													checked={selected}
-												/>
-												{option.name}
-											</li>
-										)}
-										renderInput={(params) => (
-											<TextField
-												{...params}
-												label="Amenities"
-												placeholder={
-													!filters.amenityCategoryId 
-														? "Select a category first" 
-														: filters.amenityIds?.length 
-															? `${filters.amenityIds.length} selected` 
-															: "Select amenities"
-												}
-												InputProps={{
-													...params.InputProps,
-													startAdornment: (
-														<>
-															<InputAdornment position="start">
-																<FuseSvgIcon size={18} color="action">lucide:check-square</FuseSvgIcon>
-															</InputAdornment>
-															{params.InputProps.startAdornment}
-														</>
-													),
-												}}
-											/>
-										)}
-										renderTags={(value, getTagProps) =>
-											value.map((option, index) => (
-												<Chip
-													{...getTagProps({ index })}
-													key={option.id}
-													label={option.name}
-													size="small"
-													onDelete={getTagProps({ index }).onDelete}
-												/>
-											))
-										}
-									/>
-								</div>
 							</div>
 
 							<Divider />
@@ -558,14 +440,6 @@ function AttractionsHeader({ totalResults, isLoading }: AttractionsHeaderProps) 
 											deleteIcon={<FuseSvgIcon size={16}>lucide:x</FuseSvgIcon>}
 										/>
 									)}
-									{filters.amenityCategoryId && (
-										<Chip
-											label={`Category: ${categories.find(c => c.id === filters.amenityCategoryId)?.name}`}
-											size="small"
-											onDelete={() => handleFilterChange('amenityCategoryId', '')}
-											deleteIcon={<FuseSvgIcon size={16}>lucide:x</FuseSvgIcon>}
-										/>
-									)}
 									{filters.amenityIds && filters.amenityIds.length > 0 && (
 										<Chip
 											label={`${filters.amenityIds.length} Amenities`}
@@ -603,4 +477,4 @@ function AttractionsHeader({ totalResults, isLoading }: AttractionsHeaderProps) 
 	);
 }
 
-export default AttractionsHeader;
+export default RoomsHeader;

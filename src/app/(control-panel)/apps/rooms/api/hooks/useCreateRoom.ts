@@ -1,21 +1,20 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { attractionsApi } from '../services/attractionsApiService';
-import { Attraction } from '../types';
 import { useSnackbar } from 'notistack';
-import { attractionsQueryKey } from './useAttractions';
+import { roomsApi } from '../services/roomsApiService';
+import { Room } from '../types';
 
-export const useCreateAttraction = () => {
+export const useCreateRoom = () => {
 	const queryClient = useQueryClient();
 	const { enqueueSnackbar } = useSnackbar();
 
 	return useMutation({
-		mutationFn: (data: Partial<Attraction>) => attractionsApi.createAttraction(data),
+		mutationFn: (data: Partial<Room>) => roomsApi.createRoom(data),
 		onSuccess: () => {
-			queryClient.invalidateQueries({ queryKey: attractionsQueryKey });
-			enqueueSnackbar('Attraction created successfully', { variant: 'success' });
+			queryClient.invalidateQueries({ queryKey: ['rooms'] });
+			enqueueSnackbar('Room created successfully', { variant: 'success' });
 		},
 		onError: () => {
-			enqueueSnackbar('Error creating attraction', { variant: 'error' });
+			enqueueSnackbar('Error creating room', { variant: 'error' });
 		}
 	});
 };

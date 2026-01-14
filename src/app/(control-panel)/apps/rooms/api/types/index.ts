@@ -1,57 +1,43 @@
-export type AttractionLocation = {
-	type: string;
-	coordinates: [number, number]; // [longitude, latitude]
-	address: string;
-	city: string;
-};
-
-export type AttractionContact = {
-	phone: string;
-	email: string;
-	website: string;
-};
-
-export type AttractionOperatingHour = {
-	day: string;
-	_id?: string;
-	startDay?: string;
-	endDay?: string;
-	openTime: string;
-	closeTime: string;
-};
-
-export type Partner = {
-	name: string;
-	email: string;
+export type RoomImage = {
 	id: string;
+	isDeleted?: boolean;
+	createdAt?: string;
+	updatedAt?: string;
+	url: string;
 };
 
-export type Attraction = {
+export type RoomAmenity = {
 	id: string;
+	isDeleted?: boolean;
+	createdAt?: string;
+	updatedAt?: string;
 	name: string;
-	description: string;
-	location: AttractionLocation;
-	contact: AttractionContact;
-	price: number;
-	operatingHour: AttractionOperatingHour[];
-	partnerId: string | Partner;
-	images: string[];
-	amenities: string[];
-	status: string;
-	averageRating: number;
-	totalRatings: number;
-	averageServiceRate: number;
-	averageAttractionRate: number;
-	averageRoomRate: number;
-	averageFoodRate: number;
-	registerDate: string;
-	createdAt: string;
-	updatedAt: string;
-};
-
-export type AttractionCategory = {
-	id: string;
-	name: string;
-	slug: string;
+	icon?: string;
 	description?: string;
 };
+
+export type Room = {
+	id: string;
+	isDeleted?: boolean;
+	createdAt?: string;
+	updatedAt?: string;
+	name: string;
+	description?: string;
+	capacity?: number;
+	images?: RoomImage[];
+	isActive?: boolean;
+	amenities?: RoomAmenity[];
+	hourlyRate?: number;
+	overnightRate?: number;
+};
+
+export type RoomCategory = {
+	id: string;
+	name: string;
+	slug?: string;
+	description?: string;
+};
+
+// Backwards compatibility aliases
+export type Attraction = Room;
+export type AttractionCategory = RoomCategory;

@@ -4,11 +4,6 @@ import { Amenity } from '../types';
 
 const AmenityModel = (data: PartialDeep<Amenity>) =>
 	_.defaults(data || {}, {
-		id: _.uniqueId('amenity-'),
-		name: '',
-		categoryId: '',
-		icon: '',
-		description: '',
 		createdAt: new Date().toISOString(),
 		updatedAt: new Date().toISOString()
 	});

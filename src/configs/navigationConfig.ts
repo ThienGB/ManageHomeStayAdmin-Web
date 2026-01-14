@@ -37,19 +37,19 @@ const navigationConfig: FuseNavItemType[] = [
 		]
 	},
 	{
-		id: 'attractions',
-		title: 'Attractions',
-		subtitle: 'Manage your attractions',
+		id: 'rooms',
+		title: 'Rooms',
+		subtitle: 'Manage your rooms',
 		type: 'group',
 		icon: 'lucide:layout-dashboard',
 		translate: 'ATTRACTION',
 		children: [
 			{
-				id: 'attractions.attraction',
-				title: 'Attractions',
+				id: 'rooms.list',
+				title: 'Rooms',
 				type: 'item',
 				icon: 'heroicons-outline:home-modern',
-				url: '/apps/attractions'
+				url: '/apps/rooms'
 			}
 		]
 	},

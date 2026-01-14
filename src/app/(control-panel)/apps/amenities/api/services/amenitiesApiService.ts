@@ -10,10 +10,9 @@ export type AmenityDetailResponse = StrictApiResponse<Amenity, false>;
 
 export const amenitiesApi = {
 	
-	getAmenities: async (pagination: Pagination , search?: string , categoryId?: string): Promise<StrictApiResponse<Amenity, true>> => {
-		const params = { ...pagination, ...(search && { search }), ...(categoryId && { categoryId }) };
-		const result = mainApi.get('amenities', { searchParams: params }).json();
-		return result as Promise<StrictApiResponse<Amenity, true>>;
+	getAmenities: async (): Promise<Amenity[]> => {
+		const result = await mainApi.get('amenities').json<ApiResponse<Amenity[]>>();
+		return result.data;
 	},
 
 	getAmenity: async (id: string): Promise<Amenity> => {

@@ -1,8 +1,8 @@
-import { ReactNode, useState } from "react";
-import { AttractionsAppContext, AttractionsState, AttractionsFilters } from "./AttractionsAppContext";
 import { Pagination } from "@/types";
+import { ReactNode, useState } from "react";
+import { RoomsAppContext, RoomsFilters, RoomsState } from "./RoomsAppContext";
 
-const initialFilters: AttractionsFilters = {
+const initialFilters: RoomsFilters = {
   search: "",
   city: "",
   amenityIds: [],
@@ -13,7 +13,7 @@ const initialFilters: AttractionsFilters = {
   maxPrice: undefined,
 };
 
-export const AttractionsAppContextProvider = ({
+export const RoomsAppContextProvider = ({
   children,
 }: {
   children: ReactNode;
@@ -22,13 +22,13 @@ export const AttractionsAppContextProvider = ({
     page: 1,
     limit: 10,
   });
-  const [filters, setFilters] = useState<AttractionsFilters>(initialFilters);
+  const [filters, setFilters] = useState<RoomsFilters>(initialFilters);
 
   const resetFilters = () => {
     setFilters(initialFilters);
   };
 
-  const value: AttractionsState = {
+  const value: RoomsState = {
     pagination,
     setPagination,
     filters,
@@ -37,8 +37,8 @@ export const AttractionsAppContextProvider = ({
   };
 
   return (
-    <AttractionsAppContext.Provider value={value}>
+    <RoomsAppContext.Provider value={value}>
       {children}
-    </AttractionsAppContext.Provider>
+    </RoomsAppContext.Provider>
   );
 };

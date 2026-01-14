@@ -1,10 +1,10 @@
 import { useContext } from 'react';
-import { AttractionsAppContext } from './AttractionsAppContext';
+import { RoomsAppContext } from './RoomsAppContext';
 
-export const useAttractionsAppContext = () => {
-	const context = useContext(AttractionsAppContext);
+export const useRoomsAppContext = () => {
+	const context = useContext(RoomsAppContext);
 	if (!context) {
-		throw new Error('useAttractionsAppContext must be used within AttractionsAppContextProvider');
+		throw new Error('useRoomsAppContext must be used within RoomsAppContextProvider');
 	}
 	return context;
 };

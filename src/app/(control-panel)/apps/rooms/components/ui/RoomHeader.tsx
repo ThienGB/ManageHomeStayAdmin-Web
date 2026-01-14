@@ -1,24 +1,24 @@
+import FuseSvgIcon from '@fuse/core/FuseSvgIcon';
+import useNavigate from '@fuse/hooks/useNavigate';
+import useParams from '@fuse/hooks/useParams';
 import Button from '@mui/material/Button';
 import Typography from '@mui/material/Typography';
+import _ from 'lodash';
 import { motion } from 'motion/react';
 import { useFormContext } from 'react-hook-form';
-import useParams from '@fuse/hooks/useParams';
-import _ from 'lodash';
-import FuseSvgIcon from '@fuse/core/FuseSvgIcon';
 import PageBreadcrumb from 'src/components/PageBreadcrumb';
-import useNavigate from '@fuse/hooks/useNavigate';
-import { Attraction } from '../../api/types';
-import { useCreateAttraction } from '../../api/hooks/useCreateAttraction';
-import { useUpdateAttraction } from '../../api/hooks/useUpdateAttraction';
-import { useDeleteAttraction } from '../../api/hooks/useDeleteAttraction';
+import { useCreateRoom } from '../../api/hooks/useCreateRoom';
+import { useDeleteRoom } from '../../api/hooks/useDeleteRoom';
+import { useUpdateRoom } from '../../api/hooks/useUpdateRoom';
+import { Room } from '../../api/types';
 
-function AttractionHeader() {
-	const routeParams = useParams<{ attractionId: string }>();
-	const { attractionId } = routeParams;
+function RoomHeader() {
+	const routeParams = useParams<{ roomId: string }>();
+	const { roomId } = routeParams as any;
 
-	const { mutate: createAttraction } = useCreateAttraction();
-	const { mutate: saveAttraction } = useUpdateAttraction();
-	const { mutate: removeAttraction } = useDeleteAttraction();
+	const { mutate: createRoom } = useCreateRoom();
+	const { mutate: updateRoom } = useUpdateRoom();
+	const { mutate: deleteRoom } = useDeleteRoom();
 
 	const methods = useFormContext();
 	const { formState, watch, getValues } = methods;
@@ -26,19 +26,22 @@ function AttractionHeader() {
 
 	const navigate = useNavigate();
 
-	const { name, images } = watch() as Attraction;
+	const { name, images } = watch() as Room;
+	const imageUrl = images && images.length > 0 
+		? (typeof images[0] === 'string' ? images[0] : (images[0] as any)?.url)
+		: undefined;
 
-	function handleSaveAttraction() {
-		saveAttraction( {attractionId, data: getValues() as Attraction});
+	function handleSaveRoom() {
+		updateRoom( {roomId, data: getValues() as Room});
 	}
 
-	function handleCreateAttraction() {
-		createAttraction(getValues() as Attraction);
+	function handleCreateRoom() {
+		createRoom(getValues() as Room);
 	}
 
-	function handleRemoveAttraction() {
-		removeAttraction(attractionId);
-		navigate('/apps/attractions');
+	function handleRemoveRoom() {
+		deleteRoom(roomId);
+		navigate('/apps/rooms');
 	}
 
 	return (
@@ -54,7 +57,7 @@ function AttractionHeader() {
 						{images && images.length > 0 ? (
 							<img
 								className="w-8 rounded-sm sm:w-12"
-								src={images[0]}
+								src={images[0]?.url}
 								alt={name}
 							/>
 						) : (
@@ -71,13 +74,13 @@ function AttractionHeader() {
 						animate={{ x: 0, transition: { delay: 0.3 } }}
 					>
 						<Typography className="truncate text-lg font-semibold sm:text-2xl">
-							{name || 'New Attraction'}
+							{name || 'New Room'}
 						</Typography>
 						<Typography
 							variant="caption"
 							className="font-medium"
 						>
-							Attraction Detail
+								Room Detail
 						</Typography>
 					</motion.div>
 				</div>
@@ -86,13 +89,13 @@ function AttractionHeader() {
 					initial={{ opacity: 0, x: 20 }}
 					animate={{ opacity: 1, x: 0, transition: { delay: 0.3 } }}
 				>
-					{attractionId !== 'new' ? (
+					{roomId !== 'new' ? (
 						<>
 							<Button
 								className="mx-1 whitespace-nowrap"
 								variant="contained"
 								color="secondary"
-								onClick={handleRemoveAttraction}
+								onClick={handleRemoveRoom}
 								startIcon={<FuseSvgIcon>lucide:trash</FuseSvgIcon>}
 							>
 								Remove
@@ -102,7 +105,7 @@ function AttractionHeader() {
 								variant="contained"
 								color="secondary"
 								disabled={_.isEmpty(dirtyFields) || !isValid}
-								onClick={handleSaveAttraction}
+								onClick={handleSaveRoom}
 							>
 								Save
 							</Button>
@@ -113,7 +116,7 @@ function AttractionHeader() {
 							variant="contained"
 							color="secondary"
 							disabled={_.isEmpty(dirtyFields) || !isValid}
-							onClick={handleCreateAttraction}
+							onClick={handleCreateRoom}
 						>
 							Add
 						</Button>
@@ -124,4 +127,4 @@ function AttractionHeader() {
 	);
 }
 
-export default AttractionHeader;
+export default RoomHeader;

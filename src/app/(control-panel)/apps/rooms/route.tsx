@@ -1,26 +1,26 @@
+import authRoles from '@auth/authRoles';
+import { FuseRouteItemType } from '@fuse/utils/FuseUtils';
 import { lazy } from 'react';
 import { Outlet } from 'react-router';
-import { FuseRouteItemType } from '@fuse/utils/FuseUtils';
-import authRoles from '@auth/authRoles';
 
-const AttractionsAppView = lazy(() => import('./components/views/AttractionsAppView'));
-const AttractionView = lazy(() => import('./components/views/attraction/AttractionView'));
+const RoomsAppView = lazy(() => import('./components/views/RoomsAppView'));
+const RoomView = lazy(() => import('./components/views/room/RoomView'));
 
 /**
- * The Attractions App Route
+ * The Rooms App Route (renamed from Attractions)
  */
 const route: FuseRouteItemType = {
-	path: 'apps/attractions',
+	path: 'apps/rooms',
 	element: <Outlet />,
 	auth: authRoles.admin,
 	children: [
 		{
 			path: '',
-			element: <AttractionsAppView />
+			element: <RoomsAppView />
 		},
 		{
-			path: ':attractionId',
-			element: <AttractionView />
+			path: ':roomId',
+			element: <RoomView />
 		}
 	]
 };

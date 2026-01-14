@@ -1,24 +1,23 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { attractionsApi } from '../services/attractionsApiService';
-import { Attraction } from '../types';
 import { useSnackbar } from 'notistack';
-import { attractionsQueryKey } from './useAttractions';
-import { attractionQueryKey } from './useAttraction';
+import { roomsApi } from '../services/roomsApiService';
+import { Room } from '../types';
+import { roomQueryKey } from './useRoom';
 
-export const useUpdateAttraction = () => {
+export const useUpdateRoom = () => {
 	const queryClient = useQueryClient();
 	const { enqueueSnackbar } = useSnackbar();
 
 	return useMutation({
-		mutationFn: ({ attractionId, data }: { attractionId: string; data: Partial<Attraction> }) =>
-			attractionsApi.updateAttraction(attractionId, data),
-		onSuccess: (_, { attractionId }) => {
-			queryClient.invalidateQueries({ queryKey: attractionsQueryKey });
-			queryClient.invalidateQueries({ queryKey: attractionQueryKey(attractionId) });
-			enqueueSnackbar('Attraction updated successfully', { variant: 'success' });
+		mutationFn: ({ roomId, data }: { roomId: string; data: Partial<Room> }) =>
+			roomsApi.updateRoom(roomId, data),
+		onSuccess: (_, { roomId }) => {
+			queryClient.invalidateQueries({ queryKey: ['rooms'] });
+			queryClient.invalidateQueries({ queryKey: roomQueryKey(roomId) });
+			enqueueSnackbar('Room updated successfully', { variant: 'success' });
 		},
 		onError: () => {
-			enqueueSnackbar('Error updating attraction', { variant: 'error' });
+			enqueueSnackbar('Error updating room', { variant: 'error' });
 		}
 	});
 };

@@ -7,17 +7,13 @@ import { type MRT_ColumnDef } from 'material-react-table';
 import { useMemo } from 'react';
 import DataTable from 'src/components/data-table/DataTable';
 import { useAmenities } from '../../api/hooks/useAmenities';
-import { useDeleteAmenities } from '../../api/hooks/useDeleteAmenities';
 import { useDeleteAmenity } from '../../api/hooks/useDeleteAmenity';
 import { Amenity } from '../../api/types';
-import { useAmenitiesAppContext } from '../../context/amenities-context/useAmenitiesAppContext';
 
 function AmenitiesTable() {
-	const { pagination, setPagination, searchQuery } = useAmenitiesAppContext();
-	const { data, isLoading } = useAmenities(pagination, searchQuery);
-	const amenities = data?.data?.content || [];
-	const { mutate: deleteAmenities } = useDeleteAmenities();
-	const { mutate: deleteAmenity } = useDeleteAmenity(pagination);
+	const { data, isLoading } = useAmenities();
+	const amenities = data || [];
+	const { mutate: deleteAmenity } = useDeleteAmenity();
 
 	const columns = useMemo<MRT_ColumnDef<Amenity>[]>(
 		() => [
@@ -30,19 +26,9 @@ function AmenitiesTable() {
 						to={`/apps/amenities/${row.original.id}`}
 						role="button"
 					>
-						<u>{row.original.name}</u>
+						<u>{row.original?.name}</u>
 					</Typography>
 				)
-			},
-			{
-				accessorKey: 'categoryId',
-				header: 'Category',
-				Cell: ({ row }) => {
-					const category = row.original.categoryId;
-					const categoryName = typeof category === 'string' ? category : category.name;
-
-					return <Typography>{categoryName}</Typography>;
-				}
 			},
 			{
 				accessorKey: 'icon',
@@ -64,16 +50,6 @@ function AmenitiesTable() {
 						{row.original.description}
 					</Typography>
 				)
-			},
-			{
-				accessorKey: 'createdAt',
-				header: 'Created At',
-				Cell: ({ row }) => format(new Date(row.original.createdAt), 'MMM dd, yyyy')
-			},
-			{
-				accessorKey: 'updatedAt',
-				header: 'Updated At',
-				Cell: ({ row }) => format(new Date(row.original.updatedAt), 'MMM dd, yyyy')
 			}
 		],
 		[]
@@ -88,28 +64,7 @@ function AmenitiesTable() {
 				data={amenities}
 				columns={columns}
 				manualPagination
-				rowCount={data?.data?.totalElements ?? 0}
-				onPaginationChange={(updaterOrValue) => {
-					const currentState = {
-						pageIndex: Math.max(0, (pagination?.page ?? 1) - 1),
-						pageSize: pagination?.limit ?? 10
-					};
-
-					const nextState =
-						typeof updaterOrValue === 'function' ? updaterOrValue(currentState) : updaterOrValue;
-
-					setPagination({
-						page: (nextState.pageIndex ?? 0) + 1,
-						limit: nextState.pageSize ?? currentState.pageSize
-					});
-				}}
-				state={{
-					isLoading,
-					pagination: {
-						pageIndex: Math.max(0, (pagination?.page ?? 1) - 1),
-						pageSize: pagination?.limit ?? 10
-					}
-				}}
+				rowCount={amenities.length}
 				renderRowActionMenuItems={({ closeMenu, row, table }) => [
 					<MenuItem
 						key={0}

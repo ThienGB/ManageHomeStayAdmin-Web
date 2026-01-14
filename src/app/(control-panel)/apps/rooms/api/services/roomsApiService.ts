@@ -1,11 +1,11 @@
+import { Amenity, ApiResponse, Pagination, StrictApiResponse } from '@/types';
 import { api, mainApi } from '@/utils/api';
-import { Attraction, AttractionCategory } from '../types';
-import { ApiResponse, Pagination, StrictApiResponse } from '@/types';
+import { Room, RoomCategory } from '../types';
 
-export type AttractionListResponse = StrictApiResponse<Attraction, true>;
-export type AttractionDetailResponse = StrictApiResponse<Attraction, false>;
+export type RoomListResponse = StrictApiResponse<Room, true>;
+export type RoomDetailResponse = StrictApiResponse<Room, false>;
 
-export type GetAttractionsParams = Pagination & {
+export type GetRoomsParams = Pagination & {
 	search?: string;
 	city?: string;
 	amenityIds?: string[];
@@ -16,8 +16,8 @@ export type GetAttractionsParams = Pagination & {
 	maxPrice?: number;
 };
 
-export const attractionsApi = {
-	getAttractions: async (params: GetAttractionsParams): Promise<StrictApiResponse<Attraction, true>> => {
+export const roomsApi = {
+    getRooms: async (params: GetRoomsParams): Promise<StrictApiResponse<Room, true>> => {
 		// Remove undefined, null, and empty string/array values from params
 		const cleanParams: Record<string, string | number> = {};
 		
@@ -38,34 +38,26 @@ export const attractionsApi = {
 			}
 		});
 
-		const result = mainApi.get('attractions', { searchParams: cleanParams }).json();
-		return result as Promise<StrictApiResponse<Attraction, true>>;
+		const result = mainApi.get('rooms').json();
+		return result as Promise<StrictApiResponse<Room, true>>;
 	},
 
-	getAttraction: async (attractionId: string): Promise<Attraction> => {
-		const result = await mainApi.get(`attractions/${attractionId}`).json<ApiResponse<Attraction>>();
+	getRoom: async (roomId: string): Promise<Room> => {
+		const result = await mainApi.get(`rooms/${roomId}`).json<ApiResponse<Room>>();
 		return result.data;
 	},
 
-	createAttraction: async (data: Partial<Attraction>): Promise<Attraction> => {
-		const result = await mainApi.post('attractions', { json: data }).json<ApiResponse<Attraction>>();
+	createRoom: async (data: Partial<Room>): Promise<Room> => {
+		const result = await mainApi.post('rooms', { json: data }).json<ApiResponse<Room>>();
 		return result.data;
 	},
 
-	updateAttraction: async (attractionId: string, data: Partial<Attraction>): Promise<Attraction> => {
-		const result = await mainApi.put(`attractions/${attractionId}`, { json: data }).json<ApiResponse<Attraction>>();
+	updateRoom: async (roomId: string, data: Partial<Room>): Promise<Room> => {
+		const result = await mainApi.put(`rooms/${roomId}`, { json: data }).json<ApiResponse<Room>>();
 		return result.data;
 	},
 
-	deleteAttraction: async (attractionId: string): Promise<void> => {
-		await mainApi.delete(`attractions/${attractionId}`);
-	},
-
-	deleteAttractions: async (attractionIds: string[]): Promise<void> => {
-		await api.delete('mock/attractions', { json: attractionIds });
-	},
-
-	getCategories: async (): Promise<AttractionCategory[]> => {
-		return api.get('mock/attraction-categories').json();
+	deleteRoom: async (roomId: string): Promise<void> => {
+		await mainApi.delete(`rooms/${roomId}`);
 	}
 };

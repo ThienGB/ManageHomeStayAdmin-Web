@@ -1,7 +1,7 @@
 import { Pagination } from "@/types";
 import { createContext } from "react";
 
-export type AttractionsFilters = {
+export type RoomsFilters = {
   search?: string;
   city?: string;
   amenityIds?: string[];
@@ -12,12 +12,12 @@ export type AttractionsFilters = {
   maxPrice?: number;
 };
 
-export type AttractionsState = {
+export type RoomsState = {
   pagination: Pagination;
   setPagination: (pagination: Pagination) => void;
-  filters: AttractionsFilters;
-  setFilters: (filters: AttractionsFilters) => void;
+  filters: RoomsFilters;
+  setFilters: (filters: RoomsFilters) => void;
   resetFilters: () => void;
 };
 
-export const AttractionsAppContext = createContext<AttractionsState | null>(null);
+export const RoomsAppContext = createContext<RoomsState | null>(null);

@@ -45,11 +45,6 @@ function AmenityView() {
 			setCategorySearch(value);
 		}, 300);
 	}, []);
-
-	const { data } = useAmenityCategories({ page: 1, limit: 100 }, categorySearch);
-	const categories = data?.data?.content || [];
-	
-
 	const methods = useForm({
 		mode: 'onChange',
 		defaultValues: {},
@@ -70,17 +65,7 @@ function AmenityView() {
 
 	useEffect(() => {
 		if (amenity) {
-			const categoryId = typeof amenity.categoryId === 'string' ? amenity.categoryId : amenity.categoryId.id;
-			const categoryName = typeof amenity.categoryId === 'string' ? '' : amenity.categoryId.name;
-			
-			reset({ 
-				...amenity,
-				categoryId
-			});
-			
-			if (categoryName) {
-				setInputValue(categoryName);
-			}
+			reset({ ...amenity});
 		}
 	}, [amenity, reset]);
 
@@ -148,53 +133,6 @@ function AmenityView() {
 										/>
 									</FormControl>
 								)}
-							/>
-
-							<Controller
-								name="categoryId"
-								control={control}
-								render={({ field: { onChange, value } }) => {
-									const selectedCategory = categories?.find((c) => c.id === value);
-									
-									return (
-										<FormControl className="w-full">
-											<FormLabel htmlFor="categoryId">Category</FormLabel>
-											<Autocomplete
-												freeSolo
-												options={categories}
-												getOptionLabel={(option) => typeof option === 'string' ? option : option.name}
-												value={selectedCategory || null}
-												inputValue={inputValue}
-												onChange={(event, newValue) => {
-													if (newValue && typeof newValue !== 'string') {
-														onChange(newValue.id);
-														setInputValue(newValue.name);
-													} else {
-														onChange('');
-														setInputValue('');
-													}
-												}}
-												onInputChange={(event, newInputValue, reason) => {
-													if (reason === 'input') {
-														setInputValue(newInputValue);
-														debouncedSearch(newInputValue);
-													} else if (reason === 'reset' && selectedCategory) {
-														setInputValue(selectedCategory.name);
-													}
-												}}
-												renderInput={(params) => (
-													<TextField
-														{...params}
-														placeholder="Select or enter category"
-														id="categoryId"
-														error={!!errors.categoryId}
-														helperText={errors?.categoryId?.message as string}
-													/>
-												)}
-											/>
-										</FormControl>
-									);
-								}}
 							/>
 
 							<Controller

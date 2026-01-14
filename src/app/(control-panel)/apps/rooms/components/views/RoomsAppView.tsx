@@ -1,12 +1,12 @@
 'use client';
 
-import AttractionsHeader from '../ui/AttractionsHeader';
-import AttractionsTable from '../ui/AttractionsTable';
 import FusePageCarded from '@fuse/core/FusePageCarded';
 import { styled } from '@mui/material/styles';
-import { AttractionsAppContextProvider } from '../../context/attractions-context/AttractionsAppContextProvider';
-import { useAttractionsAppContext } from '../../context/attractions-context/useAttractionsAppContext';
-import { useAttractions } from '../../api/hooks/useAttractions';
+import { useRooms } from '../../api/hooks/useRooms';
+import { RoomsAppContextProvider } from '../../context/rooms-context/RoomsAppContextProvider';
+import { useRoomsAppContext } from '../../context/rooms-context/useRoomsAppContext';
+import RoomsHeader from '../ui/RoomsHeader';
+import RoomsTable from '../ui/RoomsTable';
 
 const Root = styled(FusePageCarded)(() => ({
 	'& .container': {
@@ -14,30 +14,30 @@ const Root = styled(FusePageCarded)(() => ({
 	}
 }));
 
-function AttractionsAppView() {
-	const { pagination, filters } = useAttractionsAppContext();
-	
-	const { data, isLoading } = useAttractions({
+function RoomsAppView() {
+	const { pagination, filters } = useRoomsAppContext();
+    
+	const { data, isLoading } = useRooms({
 		...pagination,
 		...filters
 	});
-	
+    
 	const totalResults = data?.data?.totalElements;
 
 	return (
 		<Root
-			header={<AttractionsHeader totalResults={totalResults} isLoading={isLoading} />}
-			content={<AttractionsTable />}
+			header={<RoomsHeader totalResults={totalResults} isLoading={isLoading} />}
+			content={<RoomsTable />}
 		/>
 	);
 }
 
-const AttractionsWrapper = () => {
+const RoomsWrapper = () => {
 	return (
-		<AttractionsAppContextProvider>
-			<AttractionsAppView />
-		</AttractionsAppContextProvider>
+		<RoomsAppContextProvider>
+			<RoomsAppView />
+		</RoomsAppContextProvider>
 	);
 };
 
-export default AttractionsWrapper;
+export default RoomsWrapper;

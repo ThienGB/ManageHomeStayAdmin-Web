@@ -1,12 +1,12 @@
 import { useQuery } from '@tanstack/react-query';
-import { attractionsApi } from '../services/attractionsApiService';
+import { roomsApi } from '../services/roomsApiService';
 
-export const attractionQueryKey = (attractionId: string) => ['attractions', attractionId];
+export const roomQueryKey = (roomId: string) => ['rooms', roomId];
 
-export const useAttraction = (attractionId: string) => {
+export const useRoom = (roomId: string) => {
 	return useQuery({
-		queryKey: attractionQueryKey(attractionId),
-		queryFn: () => attractionsApi.getAttraction(attractionId),
-		enabled: Boolean(attractionId)
+		queryKey: roomQueryKey(roomId),
+		queryFn: () => roomsApi.getRoom(roomId),
+		enabled: Boolean(roomId)
 	});
 };
