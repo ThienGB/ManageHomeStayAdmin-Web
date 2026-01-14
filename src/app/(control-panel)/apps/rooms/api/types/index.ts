@@ -24,6 +24,8 @@ export type Room = {
 	name: string;
 	description?: string;
 	capacity?: number;
+	bed?: number;
+	area?: number;
 	images?: RoomImage[];
 	isActive?: boolean;
 	amenities?: RoomAmenity[];

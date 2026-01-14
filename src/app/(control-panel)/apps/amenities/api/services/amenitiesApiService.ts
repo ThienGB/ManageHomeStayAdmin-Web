@@ -1,5 +1,5 @@
 import { api , mainApi} from '@/utils/api';
-import { Amenity, AmenityCategory } from '../types';
+import { Amenity } from '../types';
 import { ApiResponse, Pagination, StrictApiResponse } from '@/types';
 
 export type AmenityListResponse = StrictApiResponse<Amenity, true>;
@@ -36,23 +36,6 @@ export const amenitiesApi = {
 
 	deleteAmenities: async (ids: string[]): Promise<void> => {
 		await api.delete('mock/amenities', { json: ids });
-	},
-
-	getCategories: async (pagination:Pagination , search?: string): Promise<StrictApiResponse<AmenityCategory, true>> => {
-		const result = mainApi.get('amenityCategories', { searchParams: { ...pagination, search } }).json();
-		return result as Promise<StrictApiResponse<AmenityCategory, true>>
-	},
-
-	getCategory: async (id: string): Promise<AmenityCategory> => {
-		return api.get(`mock/amenity-categories/${id}`).json();
-	},
-
-	createCategory: async (category: Partial<AmenityCategory>): Promise<AmenityCategory> => {
-		return mainApi.post('amenityCategories', { json: category }).json();
-	},
-
-	updateCategory: async (category: AmenityCategory): Promise<AmenityCategory> => {
-		return mainApi.put(`amenityCategories/${category.id}`, { json: category }).json();
 	},
 
 	deleteCategory: async (id: string): Promise<void> => {

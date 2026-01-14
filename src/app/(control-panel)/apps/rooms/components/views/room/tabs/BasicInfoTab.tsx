@@ -19,11 +19,8 @@ function BasicInfoTab() {
 		setDebouncedSearch(value);
 	}, 500);
 	
-	const { data, isLoading } = useAmenities(
-		{ page: 1, limit: 50 },
-		debouncedSearch || undefined
-	);
-	const amenities = data?.data?.content || [];
+	const { data, isLoading } = useAmenities();
+	const amenities = data || [];
 	return (
 		<div className="flex flex-col gap-4">
 			<Controller

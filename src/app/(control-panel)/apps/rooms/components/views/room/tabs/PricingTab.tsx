@@ -23,8 +23,6 @@ function PricingTab() {
 							type="number"
 							fullWidth
 							inputProps={{ step: '0.01', min: '0' }}
-							error={!!errors?.price?.amount}
-							helperText={errors?.price?.amount?.message as string}
 						/>
 					</FormControl>
 				)}
