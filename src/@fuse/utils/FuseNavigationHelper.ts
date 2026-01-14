@@ -163,9 +163,9 @@ class FuseNavigationHelper {
 		/**
 		 * Check if user has grants
 		 */
-		if (userRole && Array.isArray(authArr) && Array.isArray(userRole)) {
-			return authArr.some((r: string) => userRole.indexOf(r) >= 0);
-		}
+		// if (userRole && Array.isArray(authArr) && Array.isArray(userRole)) {
+		// 	return authArr.some((r: string) => userRole.indexOf(r) >= 0);
+		// }
 
 		/*
             Check if user role is string,
