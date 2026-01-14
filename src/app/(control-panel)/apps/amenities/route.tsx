@@ -22,10 +22,6 @@ const route: FuseRouteItemType = {
 			element: <AmenitiesAppView />
 		},
 		{
-			path: 'categories',
-			element: <CategoriesWapper />
-		},
-		{
 			path: ':amenityId',
 			element: <AmenityView />
 		}
