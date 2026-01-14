@@ -1,5 +1,5 @@
-import { FuseSettingsConfigType } from "@fuse/core/FuseSettings/FuseSettings";
 import { FuseAuthUser } from "@fuse/core/FuseAuthProvider/types/FuseAuthUser";
+import { FuseSettingsConfigType } from "@fuse/core/FuseSettings/FuseSettings";
 import { PartialDeep } from "type-fest";
 
 /**
@@ -7,7 +7,7 @@ import { PartialDeep } from "type-fest";
  */
 export type User = FuseAuthUser & {
   id: string;
-  role: string[] | string | ["admin", "staff", "user"];
+  role: string[] | string;
   name: string;
   gender ?: string;
   photoURL?: string;

@@ -5,7 +5,6 @@ import authRoles from '@auth/authRoles';
 
 const AmenitiesAppView = lazy(() => import('./components/views/AmenitiesAppView'));
 const AmenityView = lazy(() => import('./components/views/amenity/AmenityView'));
-const CategoriesWapper = lazy(() => import('./components/views/CategoriesAppView'));
 
 /**
  * The Amenities App Route
@@ -22,10 +21,6 @@ const route: FuseRouteItemType = {
 		{
 			path: 'list',
 			element: <AmenitiesAppView />
-		},
-		{
-			path: 'categories',
-			element: <CategoriesWapper />
 		},
 		{
 			path: ':amenityId',
