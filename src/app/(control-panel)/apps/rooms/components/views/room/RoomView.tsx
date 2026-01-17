@@ -502,7 +502,7 @@ function RoomView() {
 																	lucide:dollar-sign
 																</FuseSvgIcon>
 																<Typography variant="body2" className="font-semibold">
-																	${slot.price?.toLocaleString() || 0}
+																	{slot.price?.toLocaleString() || 0} VND
 																</Typography>
 															</div>
 														</div>
@@ -745,8 +745,8 @@ function RoomView() {
 																	<FormControlLabel
 																		control={
 																			<Checkbox
-																				{...field}
-																				checked={field.value || false}
+																				checked={!!field.value}
+																				onChange={(e) => field.onChange(e.target.checked)}
 																			/>
 																		}
 																		label="Overnight"
@@ -756,42 +756,36 @@ function RoomView() {
 														</Grid>
 														<Grid size={{ sm: 12, md: 3 }}>
 															<Controller
-																name={`timeslots.${index}.openTime`}
+																name={`timeslots.${index}.startTime`}
 																control={control}
 																render={({ field }) => (
 																	<TextField
 																		{...field}
-																		label="Open Time"
+																		label="Start Time"
 																		type="time"
 																		fullWidth
 																		size="small"
 																		InputLabelProps={{
 																			shrink: true
 																		}}
-																		disabled={watch(
-																			`timeslots.${index}.isOvernight`
-																		)}
 																	/>
 																)}
 															/>
 														</Grid>
 														<Grid size={{ sm: 12, md: 3 }}>
 															<Controller
-																name={`timeslots.${index}.closeTime`}
+																name={`timeslots.${index}.endTime`}
 																control={control}
 																render={({ field }) => (
 																	<TextField
 																		{...field}
-																		label="Close Time"
+																		label="End Time"
 																		type="time"
 																		fullWidth
 																		size="small"
 																		InputLabelProps={{
 																			shrink: true
 																		}}
-																		disabled={watch(
-																			`timeslots.${index}.isOvernight`
-																		)}
 																	/>
 																)}
 															/>
