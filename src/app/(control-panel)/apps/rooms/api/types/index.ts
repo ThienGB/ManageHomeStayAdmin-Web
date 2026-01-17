@@ -42,9 +42,12 @@ export type RoomCategory = {
 
 export type TimeSlot = {
 	id: string;
-	openTime?: string;
-	closeTime?: string;
+	roomId?: string;
+	startTime?: string;
+	endTime?: string;
+	price?: number;
 	isOvernight?: boolean;
+	status?: string;
 	createdAt?: string;
 	updatedAt?: string;
 };

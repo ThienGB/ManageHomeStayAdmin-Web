@@ -9,7 +9,7 @@ import { motion } from 'motion/react';
 import { useEffect, useState } from 'react';
 
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Controller, FormProvider, useForm } from 'react-hook-form';
+import { Controller, FormProvider, useFieldArray, useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { useRoom } from '../../../api/hooks/useRoom';
 
@@ -29,7 +29,11 @@ import {
 import Grid from '@mui/material/Grid';
 import { useAmenities } from '../../../api/hooks/useAmenities';
 import { useCreateRoom } from '../../../api/hooks/useCreateRoom';
+import { useCreateTimeSlot } from '../../../api/hooks/useCreateTimeSlot';
+import { useDeleteTimeSlot } from '../../../api/hooks/useDeleteTimeSlot';
+import { useTimeSlots } from '../../../api/hooks/useTimeSlots';
 import { useUpdateRoom } from '../../../api/hooks/useUpdateRoom';
+import { useUpdateTimeSlot } from '../../../api/hooks/useUpdateTimeSlot';
 import TimeSlotModel from '../../../api/models/TimeSlotModel';
 
 const schema = z
@@ -38,7 +42,16 @@ const schema = z
 		description: z.string().min(10, 'Description must be at least 10 characters'),
 		price: z.number().min(0, 'Price must be positive'),
 		status: z.enum(['PENDING', 'APPROVED', 'REJECTED']),
-		amenities: z.array(z.string()).optional()
+		amenities: z.array(z.string()).optional(),
+		timeslots: z.array(
+			z.object({
+				id: z.string().optional(),
+				startTime: z.string().optional(),
+				endTime: z.string().optional(),
+				price: z.number().optional(),
+				isOvernight: z.boolean().optional()
+			})
+		).default([])
 	})
 	.passthrough(); // Allow additional fields
 
@@ -49,13 +62,16 @@ function RoomView() {
 
 	const isCreateMode = (roomId || '').toLowerCase() === 'new';
 	const [isEditMode, setIsEditMode] = useState(isCreateMode);
-	const [timeSlots, setTimeSlots] = useState([]);
 	const [currentImageIndex, setCurrentImageIndex] = useState(0);
 	const [amenitySearch, setAmenitySearch] = useState('');
 
 	const { data: amenities } = useAmenities(amenitySearch);
+	const { data: timeSlots } = useTimeSlots(roomId);
 	const { mutate: updateRoom } = useUpdateRoom();
 	const { mutate: createRoom } = useCreateRoom();
+	const { mutate: createTimeSlot } = useCreateTimeSlot();
+	const { mutate: updateTimeSlot } = useUpdateTimeSlot();
+	const { mutate: deleteTimeSlot } = useDeleteTimeSlot();
 	const { openModal } = useGlobalContext();
 
 	type FormValues = z.infer<typeof schema>;
@@ -74,19 +90,59 @@ function RoomView() {
 		formState: { errors }
 	} = methods;
 
+	const { fields: timeslotFields, append: appendTimeSlot, remove: removeTimeSlot } = useFieldArray({
+		control,
+		name: 'timeslots'
+	});
+
 	useEffect(() => {
 		if (room) {
+			// Helper function to extract time in HH:mm format from various datetime formats
+			const normalizeTime = (timeString?: string): string | undefined => {
+				if (!timeString) return undefined;
+				
+				// If it's already in HH:mm format, return as is
+				if (/^\d{2}:\d{2}$/.test(timeString)) {
+					return timeString;
+				}
+				
+				// If it's a full datetime string, extract time part
+				try {
+					const date = new Date(timeString);
+					if (!isNaN(date.getTime())) {
+						const hours = date.getHours().toString().padStart(2, '0');
+						const minutes = date.getMinutes().toString().padStart(2, '0');
+						return `${hours}:${minutes}`;
+					}
+				} catch (e) {
+					// If parsing fails, try to extract HH:mm from string
+					const match = timeString.match(/(\d{2}):(\d{2})/);
+					if (match) {
+						return `${match[1]}:${match[2]}`;
+					}
+				}
+				
+				return timeString;
+			};
+
 			// Normalize certain nested fields so the form values match our schema.
 			const normalized = {
 				...room,
 				amenities: room.amenities
 					? room.amenities.map((a: any) => (typeof a === 'string' ? a : a.id || a._id || a))
+					: [],
+				timeslots: timeSlots 
+					? timeSlots.map((slot: any) => ({
+						...slot,
+						startTime: normalizeTime(slot.startTime),
+						endTime: normalizeTime(slot.endTime)
+					}))
 					: []
 			};
 
 			reset(normalized as any);
 		}
-	}, [room, reset]);
+	}, [room, timeSlots, reset]);
 
 	const statusColor = room?.isActive ? 'success' : 'error';
 
@@ -385,6 +441,77 @@ function RoomView() {
 										</Grid>
 									</Paper>
 								)}
+
+								{/* TimeSlots Section */}
+								{timeSlots && timeSlots.length > 0 && (
+									<Paper
+										className="mb-4 p-6"
+										elevation={1}
+									>
+										<Typography
+											variant="h5"
+											className="mb-4 font-bold"
+										>
+											Time Slots
+										</Typography>
+										<Grid
+											container
+											spacing={3}
+										>
+											{timeSlots.map((slot, idx) => (
+												<Grid
+													key={idx}
+													size={{ sm: 12, md: 6 }}
+												>
+													<Paper
+														className="bg-gray-50 p-4 dark:bg-gray-800"
+														elevation={0}
+													>
+														<div className="flex items-center justify-between mb-3">
+															<Typography
+																variant="h6"
+																className="font-semibold"
+															>
+																Slot {idx + 1}
+															</Typography>
+															{slot.isOvernight && (
+																<Chip
+																	label="Overnight"
+																	size="small"
+																	color="primary"
+																/>
+															)}
+														</div>
+														<div className="space-y-2">
+															<div className="flex items-center gap-2">
+																<FuseSvgIcon
+																	size={16}
+																	className="text-gray-500"
+																>
+																	lucide:clock
+																</FuseSvgIcon>
+																<Typography variant="body2">
+																	{slot.startTime} - {slot.endTime}
+																</Typography>
+															</div>
+															<div className="flex items-center gap-2">
+																<FuseSvgIcon
+																	size={16}
+																	className="text-gray-500"
+																>
+																	lucide:dollar-sign
+																</FuseSvgIcon>
+																<Typography variant="body2" className="font-semibold">
+																	${slot.price?.toLocaleString() || 0}
+																</Typography>
+															</div>
+														</div>
+													</Paper>
+												</Grid>
+											))}
+										</Grid>
+									</Paper>
+								)}
 							</Grid>
 						</Grid>
 					</div>
@@ -581,21 +708,24 @@ function RoomView() {
 									<Button
 										size="small"
 										startIcon={<FuseSvgIcon>lucide:plus</FuseSvgIcon>}
-										// onClick={() =>
-										// 	appendHour(
-										// 		TimeSlotModel({
-										// 			openTime: "09:00",
-										// 			closeTime: "17:00",
-										// 		})
-										// 	)
-										// }
+										onClick={() =>
+											appendTimeSlot(
+												TimeSlotModel({
+													startTime: "09:00",
+													endTime: "17:00",
+													price: 0,
+													roomId: room.id,
+													isOvernight: false
+												})
+											)
+										}
 									>
 										Add Time Slot
 									</Button>
 								</div>
 
 								<div className="space-y-4">
-									{timeSlots.map((field, index) => (
+									{timeslotFields.map((field, index) => (
 										<Paper
 											key={field.id}
 											className="bg-gray-50 p-4 dark:bg-gray-900"
@@ -607,9 +737,9 @@ function RoomView() {
 														container
 														spacing={2}
 													>
-														<Grid size={{ sm: 12, md: 6 }}>
+														<Grid size={{ sm: 12, md: 2 }}>
 															<Controller
-																name={`operatingHour.${index}.isFullDay`}
+																name={`timeslots.${index}.isOvernight`}
 																control={control}
 																render={({ field }) => (
 																	<FormControlLabel
@@ -624,9 +754,9 @@ function RoomView() {
 																)}
 															/>
 														</Grid>
-														<Grid size={{ sm: 12, md: 6 }}>
+														<Grid size={{ sm: 12, md: 3 }}>
 															<Controller
-																name={`operatingHour.${index}.openTime`}
+																name={`timeslots.${index}.openTime`}
 																control={control}
 																render={({ field }) => (
 																	<TextField
@@ -639,15 +769,15 @@ function RoomView() {
 																			shrink: true
 																		}}
 																		disabled={watch(
-																			`operatingHour.${index}.isFullDay`
+																			`timeslots.${index}.isOvernight`
 																		)}
 																	/>
 																)}
 															/>
 														</Grid>
-														<Grid size={{ sm: 12, md: 12 }}>
+														<Grid size={{ sm: 12, md: 3 }}>
 															<Controller
-																name={`operatingHour.${index}.closeTime`}
+																name={`timeslots.${index}.closeTime`}
 																control={control}
 																render={({ field }) => (
 																	<TextField
@@ -660,15 +790,15 @@ function RoomView() {
 																			shrink: true
 																		}}
 																		disabled={watch(
-																			`operatingHour.${index}.isFullDay`
+																			`timeslots.${index}.isOvernight`
 																		)}
 																	/>
 																)}
 															/>
 														</Grid>
-														<Grid size={{ sm: 12, md: 6 }}>
+														<Grid size={{ sm: 12, md: 3 }}>
 															<Controller
-																name={`operatingHour.${index}.Price`}
+																name={`timeslots.${index}.price`}
 																control={control}
 																render={({ field }) => (
 																	<TextField
@@ -680,22 +810,69 @@ function RoomView() {
 																		InputLabelProps={{
 																			shrink: true
 																		}}
+																		onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
 																	/>
 																)}
 															/>
 														</Grid>
 													</Grid>
 												</div>
-												<IconButton
-													size="small"
-													color="error"
-													// onClick={() =>
-													// 	removeHour(index)
-													// }
-												>
-													<FuseSvgIcon>lucide:trash-2</FuseSvgIcon>
-												</IconButton>
-											</div>
+									<div className="flex gap-2">
+										<IconButton
+											size="small"
+											color="primary"
+											onClick={() => {
+												const timeslotData = watch(`timeslots.${index}`);
+												// Check if it's a new timeslot (local ID) or existing (server ID)
+												if (timeslotData.id && timeslotData.id.startsWith('timeSlot-')) {
+													// New timeslot - create via API
+													createTimeSlot({ 
+														roomId, 
+														data: {
+															startTime: timeslotData.startTime,
+															endTime: timeslotData.endTime,
+															price: timeslotData.price,
+															roomId: room.id,
+															status: 'AVAILABLE',
+															isOvernight: timeslotData.isOvernight
+														}
+													});
+												} else if (timeslotData.id) {
+													// Existing timeslot - update via API
+													updateTimeSlot({ 
+														timeslotId: timeslotData.id,
+														roomId: room.id,
+														data: {
+															startTime: timeslotData.startTime,
+															endTime: timeslotData.endTime,
+															price: timeslotData.price,
+															roomId: room.id,
+															status: 'AVAILABLE',
+															isOvernight: timeslotData.isOvernight
+														}
+													});
+												}
+											}}
+										>
+											<FuseSvgIcon>lucide:save</FuseSvgIcon>
+										</IconButton>
+										<IconButton
+											size="small"
+											color="error"
+											onClick={() => {
+												// Only call API if ID exists and is not a local temp ID
+												if (field.id && !field.id.startsWith('timeSlot-')) {
+													// Existing timeslot from server - delete via API
+													deleteTimeSlot({ timeslotId: field.id, roomId });
+												}
+												// Always remove from form array
+												removeTimeSlot(index);
+											}}
+										>
+											<FuseSvgIcon>lucide:trash-2</FuseSvgIcon>
+										</IconButton>
+									</div>
+								</div>
 										</Paper>
 									))}
 								</div>
