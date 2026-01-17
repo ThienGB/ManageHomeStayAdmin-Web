@@ -254,7 +254,7 @@ function Error404PageView() {
 
 				<Link
 					className="mt-12 block font-normal"
-					to="/apps/dashboards/project"
+					to="/apps/rooms"
 				>
 					Back to Dashboard
 				</Link>

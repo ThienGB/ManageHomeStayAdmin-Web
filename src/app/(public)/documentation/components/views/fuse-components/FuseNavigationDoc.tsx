@@ -196,7 +196,7 @@ function FuseNavigationDoc() {
               title: 'Project',
               type: 'item',
               icon: 'lucide:clipboard-check',
-              url: '/dashboards/project',
+              url: '/apps/rooms',
             }
         `}
 			</FuseHighlight>
@@ -222,7 +222,7 @@ function FuseNavigationDoc() {
               title: 'Project',
               type: 'item',
               icon: 'lucide:clipboard-check',
-              url: '/dashboards/project',
+              url: '/apps/rooms',
               end: true
           }
                                 `}
@@ -263,7 +263,7 @@ function FuseNavigationDoc() {
               'id'   : 'project',
               'title': 'Project',
               'type' : 'item',
-              'url'  : '/apps/dashboards/project'
+              'url'  : '/apps/rooms'
           }
           {
               'type': 'divider
@@ -272,7 +272,7 @@ function FuseNavigationDoc() {
               'id'   : 'project',
               'title': 'Project',
               'type' : 'item',
-              'url'  : '/apps/dashboards/project'
+              'url'  : '/apps/rooms'
           }
           `}
 			</FuseHighlight>
@@ -321,7 +321,7 @@ function FuseNavigationDoc() {
                         title: 'Project',
                         type: 'item',
                         icon: 'lucide:clipboard-check',
-                        url: '/dashboards/project',
+                        url: '/apps/rooms',
                       },
                       {
                         id: 'dashboards.analytics',

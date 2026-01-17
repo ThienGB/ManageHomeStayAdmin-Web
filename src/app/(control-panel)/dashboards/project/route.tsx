@@ -7,7 +7,7 @@ const ProjectDashboardAppView = lazy(() => import('./components/views/ProjectDas
  * Project Dashboard App  Route
  */
 const route: FuseRouteItemType = {
-	path: 'dashboards/project',
+	path: 'apps/rooms',
 	element: <ProjectDashboardAppView />
 };
 
