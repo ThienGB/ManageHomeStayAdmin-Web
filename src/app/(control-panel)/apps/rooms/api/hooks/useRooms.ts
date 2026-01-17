@@ -1,11 +1,10 @@
 import { useQuery } from '@tanstack/react-query';
 import { GetRoomsParams, roomsApi } from '../services/roomsApiService';
-
-export const roomsQueryKey = (params: GetRoomsParams) => ['rooms', params];
+import { roomKeys } from './queryKeys';
 
 export const useRooms = (params: GetRoomsParams) => {
 	return useQuery({
-		queryKey: roomsQueryKey(params),
+		queryKey: roomKeys.list(params),
 		queryFn: () => roomsApi.getRooms(params)
 	});
 };

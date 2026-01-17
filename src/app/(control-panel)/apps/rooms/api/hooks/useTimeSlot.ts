@@ -1,12 +1,11 @@
 import { useQuery } from '@tanstack/react-query';
 import { timeslotsApi } from '../services/timeslotApiService';
+import { roomKeys } from './queryKeys';
 
-export const timeslotQueryKey = (timeslotId: string) => ['timeslots', timeslotId];
-
-export const useTimeSlot = (timeslotId: string) => {
+export const useTimeSlot = (roomId: string, timeslotId: string) => {
 	return useQuery({
-		queryKey: timeslotQueryKey(timeslotId),
+		queryKey: roomKeys.timeslot(roomId, timeslotId),
 		queryFn: () => timeslotsApi.getTimeSlot(timeslotId),
-		enabled: !!timeslotId
+		enabled: !!roomId && !!timeslotId
 	});
 };

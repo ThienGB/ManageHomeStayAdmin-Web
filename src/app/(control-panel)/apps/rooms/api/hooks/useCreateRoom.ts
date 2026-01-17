@@ -1,6 +1,8 @@
+import { getErrorMessage } from '@/utils/errorUtils';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useSnackbar } from 'notistack';
 import { roomsApi } from '../services/roomsApiService';
+import { roomKeys } from './queryKeys';
 
 export const useCreateRoom = () => {
 	const queryClient = useQueryClient();
@@ -9,11 +11,13 @@ export const useCreateRoom = () => {
 	return useMutation({
 		mutationFn: (data: any) => roomsApi.createRoom(data),
 		onSuccess: () => {
-			queryClient.invalidateQueries({ queryKey: ['rooms'] });
-			enqueueSnackbar('Room created successfully', { variant: 'success' });
+			// Invalidate all room lists to refresh
+			queryClient.invalidateQueries({ queryKey: roomKeys.lists() });
+			enqueueSnackbar('Thêm phòng thành công', { variant: 'success' });
 		},
-		onError: () => {
-			enqueueSnackbar('Error creating room', { variant: 'error' });
+		onError: async (error: unknown) => {
+			const errorMessage = await getErrorMessage(error);
+			enqueueSnackbar(errorMessage, { variant: 'error' });
 		}
 	});
 };

@@ -5,6 +5,7 @@ import { getErrorMessage } from '@/utils/errorUtils';
 import { useQueryClient } from '@tanstack/react-query';
 import { useSnackbar } from 'notistack';
 import { useCallback, useState } from 'react';
+import { roomKeys } from '../api/hooks/queryKeys';
 import { roomsApi } from '../api/services/roomsApiService';
 import { RoomImage } from '../api/types';
 
@@ -180,7 +181,7 @@ export function useRoomImages(roomId: string) {
 				}
 
 				// Invalidate room query to refresh data
-				queryClient.invalidateQueries({ queryKey: ['room', roomId] });
+				queryClient.invalidateQueries({ queryKey: roomKeys.detail(roomId) });
 
 				// Summary notification
 				const uploadedCount = result.uploaded.filter((r) => r.success).length;

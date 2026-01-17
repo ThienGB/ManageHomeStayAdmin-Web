@@ -1,8 +1,9 @@
+import { getErrorMessage } from '@/utils/errorUtils';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useSnackbar } from 'notistack';
 import { timeslotsApi } from '../services/timeslotApiService';
 import { TimeSlot } from '../types';
-import { timeslotsQueryKey } from './useTimeSlots';
+import { roomKeys } from './queryKeys';
 
 export const useCreateTimeSlot = () => {
 	const queryClient = useQueryClient();
@@ -12,11 +13,13 @@ export const useCreateTimeSlot = () => {
 		mutationFn: ({ roomId, data }: { roomId: string; data: Partial<TimeSlot> }) =>
 			timeslotsApi.createTimeSlot(roomId, data),
 		onSuccess: (_, { roomId }) => {
-			queryClient.invalidateQueries({ queryKey: timeslotsQueryKey(roomId) });
-			enqueueSnackbar('Time slot created successfully', { variant: 'success' });
+			// Invalidate timeslots list for this room
+			queryClient.invalidateQueries({ queryKey: roomKeys.timeslots(roomId) });
+			enqueueSnackbar('Thêm khung giờ thành công', { variant: 'success' });
 		},
-		onError: () => {
-			enqueueSnackbar('Error creating time slot', { variant: 'error' });
+		onError: async (error: unknown) => {
+			const errorMessage = await getErrorMessage(error);
+			enqueueSnackbar(errorMessage, { variant: 'error' });
 		}
 	});
 };

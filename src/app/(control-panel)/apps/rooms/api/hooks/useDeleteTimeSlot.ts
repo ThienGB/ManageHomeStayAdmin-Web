@@ -1,7 +1,8 @@
+import { getErrorMessage } from '@/utils/errorUtils';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useSnackbar } from 'notistack';
 import { timeslotsApi } from '../services/timeslotApiService';
-import { timeslotsQueryKey } from './useTimeSlots';
+import { roomKeys } from './queryKeys';
 
 export const useDeleteTimeSlot = () => {
 	const queryClient = useQueryClient();
@@ -10,12 +11,16 @@ export const useDeleteTimeSlot = () => {
 	return useMutation({
 		mutationFn: ({ timeslotId, roomId }: { timeslotId: string; roomId: string }) =>
 			timeslotsApi.deleteTimeSlot(roomId, timeslotId),
-		onSuccess: (_, { roomId }) => {
-			queryClient.invalidateQueries({ queryKey: timeslotsQueryKey(roomId) });
-			enqueueSnackbar('Time slot deleted successfully', { variant: 'success' });
+		onSuccess: (_, { roomId, timeslotId }) => {
+			// Invalidate timeslots list
+			queryClient.invalidateQueries({ queryKey: roomKeys.timeslots(roomId) });
+			// Remove the specific timeslot from cache
+			queryClient.removeQueries({ queryKey: roomKeys.timeslot(roomId, timeslotId) });
+			enqueueSnackbar('Xóa khung giờ thành công', { variant: 'success' });
 		},
-		onError: () => {
-			enqueueSnackbar('Error deleting time slot', { variant: 'error' });
+		onError: async (error: unknown) => {
+			const errorMessage = await getErrorMessage(error);
+			enqueueSnackbar(errorMessage, { variant: 'error' });
 		}
 	});
 };

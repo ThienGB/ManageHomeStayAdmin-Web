@@ -1,10 +1,10 @@
 import { useQuery } from '@tanstack/react-query';
 import { amenitiesApi } from '../../../amenities/api/services/amenitiesApiService';
+import { amenityKeys } from './queryKeys';
 
-export const useAmenities = (search?: string, categoryId?: string) => {
+export const useAmenities = (search?: string) => {
 	return useQuery({
-		queryKey: ['amenities-filter', search, categoryId],
-		queryFn: () => amenitiesApi.getAmenities(),
-		enabled: true,
+		queryKey: amenityKeys.list(search),
+		queryFn: () => amenitiesApi.getAmenities()
 	});
 };
