@@ -102,7 +102,7 @@ function RoomsTable({ searchTerm = '' }: RoomsTableProps) {
 
 	return (
 		<Paper
-			className="flex h-full w-full flex-auto flex-col overflow-hidden rounded-b-none"
+			className="flex w-full h-full flex-auto flex-col overflow-hidden rounded-b-none"
 			elevation={2}
 		>
 			<DataTable

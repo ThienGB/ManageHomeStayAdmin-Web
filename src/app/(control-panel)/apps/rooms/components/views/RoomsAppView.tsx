@@ -11,24 +11,30 @@ import RoomsTable from '../ui/RoomsTable';
 
 const Root = styled(FusePageCarded)(() => ({
 	'& .container': {
-		maxWidth: '100%!important'
+		maxWidth: '95%!important'
 	}
 }));
 
 function RoomsAppView() {
 	const { pagination, filters } = useRoomsAppContext();
 	const [searchTerm, setSearchTerm] = useState('');
-    
+
 	const { data, isLoading } = useRooms({
 		...pagination,
 		...filters
 	});
-    
+
 	const totalResults = data?.data?.totalElements;
 
 	return (
 		<Root
-			header={<RoomsHeader totalResults={totalResults} isLoading={isLoading} onSearchChange={setSearchTerm} />}
+			header={
+				<RoomsHeader
+					totalResults={totalResults}
+					isLoading={isLoading}
+					onSearchChange={setSearchTerm}
+				/>
+			}
 			content={<RoomsTable searchTerm={searchTerm} />}
 		/>
 	);

@@ -10,14 +10,16 @@ const RoomModel = (data: PartialDeep<Room>) =>
 		updatedAt: new Date().toISOString(),
 		name: '',
 		description: '',
-		capacity: 0,
-		bed: 0,
-		area: 0,
+		capacity: 1,
+		bed: 1,
+		numberOfBeds: 1,
+		area: 10,
 		images: [],
 		isActive: true,
 		amenities: [],
-		hourlyRate: 0,
-		overnightRate: 0
+		amenityIds: [],
+		hourlyRate: 100000,
+		overnightRate: 300000
 	});
 
 export default RoomModel;
