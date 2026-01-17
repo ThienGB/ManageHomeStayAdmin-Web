@@ -18,7 +18,6 @@ const route: FuseRouteItemType = {
 			path: '',
 			element: <RoomsAppView />
 		},
-
 		{
 			path: 'edit/:roomId',
 			element: <RoomView mode="edit" />

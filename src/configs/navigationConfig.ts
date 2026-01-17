@@ -26,6 +26,13 @@ const navigationConfig: FuseNavItemType[] = [
 				type: 'item',
 				icon: 'heroicons-outline:home-modern',
 				url: '/apps/rooms'
+			},
+			{
+				id: 'rooms.random-generator',
+				title: 'Random Generator',
+				type: 'item',
+				icon: 'lucide:shuffle',
+				url: '/apps/random-generator'
 			}
 		]
 	},
