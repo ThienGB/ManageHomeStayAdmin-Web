@@ -8,12 +8,13 @@ import PageBreadcrumb from 'src/components/PageBreadcrumb';
 type RoomsHeaderProps = {
 	totalResults?: number;
 	isLoading?: boolean;
+	onSearchChange?: (search: string) => void;
 };
 
 function RoomsHeader({ totalResults, isLoading }: RoomsHeaderProps) {
 	return (
 		<div className="flex flex-auto flex-col py-4">
-			<PageBreadcrumb className="mb-2" />
+			<PageBreadcrumb className="mb-2" skipHome={true} />
 			<div className="flex min-w-0 flex-auto flex-col gap-2 sm:flex-row sm:items-center">
 				<div className="flex flex-auto items-center gap-2">
 					<div className="flex flex-col gap-1">
@@ -52,7 +53,7 @@ function RoomsHeader({ totalResults, isLoading }: RoomsHeaderProps) {
 
 					<div className="flex flex-1 items-center justify-end gap-2">
 						<motion.div
-							className="flex grow-0"
+							className="flex-1 max-w-md"
 							initial={{ opacity: 0, x: 20 }}
 							animate={{ opacity: 1, x: 0, transition: { delay: 0.2 } }}
 						>

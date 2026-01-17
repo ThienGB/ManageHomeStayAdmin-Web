@@ -13,36 +13,12 @@ i18n.addResourceBundle('ar', 'navigation', ar);
  */
 const navigationConfig: FuseNavItemType[] = [
 	{
-		id: 'dashboards',
-		title: 'Dashboards',
-		subtitle: 'Unique dashboard designs',
-		type: 'group',
-		icon: 'lucide:layout-dashboard',
-		translate: 'DASHBOARDS',
-		children: [
-			{
-				id: 'dashboards.project',
-				title: 'Project',
-				type: 'item',
-				icon: 'lucide:clipboard-check',
-				url: '/dashboards/project'
-			},
-			{
-				id: 'dashboards.analytics',
-				title: 'Analytics',
-				type: 'item',
-				icon: 'lucide:chart-pie',
-				url: '/dashboards/analytics'
-			}
-		]
-	},
-	{
 		id: 'rooms',
 		title: 'Rooms',
 		subtitle: 'Manage your rooms',
 		type: 'group',
 		icon: 'lucide:layout-dashboard',
-		translate: 'ATTRACTION',
+		translate: 'ROOMS',
 		children: [
 			{
 				id: 'rooms.list',
@@ -56,7 +32,7 @@ const navigationConfig: FuseNavItemType[] = [
 	{
 		id: 'amenities',
 		title: 'Amenities',
-		subtitle: 'Manage amenities and categories',
+		subtitle: 'Manage your amenities',
 		type: 'group',
 		icon: 'lucide:package',
 		translate: 'AMENITIES',
@@ -67,30 +43,23 @@ const navigationConfig: FuseNavItemType[] = [
 				type: 'item',
 				icon: 'lucide:package',
 				url: '/apps/amenities/list'
-			},
-			{
-				id: 'amenities.categories',
-				title: 'Categories',
-				type: 'item',
-				icon: 'lucide:tags',
-				url: '/apps/amenities/categories'
 			}
 		]
 	},
 	{
-		id: 'schedules',
-		title: 'Schedules',
-		subtitle: 'Manage your schedules',
+		id: 'bookings',
+		title: 'Bookings',
+		subtitle: 'Manage your bookings',
 		type: 'group',
 		icon: 'lucide:calendar',
-		translate: 'SCHEDULES',
+		translate: 'BOOKINGS',
 		children: [
 			{
-				id: 'schedules.types',
-				title: 'Schedule Types',
+				id: 'bookings.list',
+				title: 'Bookings',
 				type: 'item',
 				icon: 'lucide:calendar-days',
-				url: '/apps/schedules/types'
+				url: '/apps/bookings'
 			}
 		]
 	}

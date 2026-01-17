@@ -2,6 +2,7 @@
 
 import FusePageCarded from '@fuse/core/FusePageCarded';
 import { styled } from '@mui/material/styles';
+import { useState } from 'react';
 import { useRooms } from '../../api/hooks/useRooms';
 import { RoomsAppContextProvider } from '../../context/rooms-context/RoomsAppContextProvider';
 import { useRoomsAppContext } from '../../context/rooms-context/useRoomsAppContext';
@@ -16,6 +17,7 @@ const Root = styled(FusePageCarded)(() => ({
 
 function RoomsAppView() {
 	const { pagination, filters } = useRoomsAppContext();
+	const [searchTerm, setSearchTerm] = useState('');
     
 	const { data, isLoading } = useRooms({
 		...pagination,
@@ -26,8 +28,8 @@ function RoomsAppView() {
 
 	return (
 		<Root
-			header={<RoomsHeader totalResults={totalResults} isLoading={isLoading} />}
-			content={<RoomsTable />}
+			header={<RoomsHeader totalResults={totalResults} isLoading={isLoading} onSearchChange={setSearchTerm} />}
+			content={<RoomsTable searchTerm={searchTerm} />}
 		/>
 	);
 }
