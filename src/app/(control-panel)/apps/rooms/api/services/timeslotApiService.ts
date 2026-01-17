@@ -1,6 +1,6 @@
 import { ApiResponse, StrictApiResponse } from '@/types';
 import { mainApi } from '@/utils/api';
-import { TimeSlot } from '../types';
+import { TimeSlot, TimeSlotAvailabilityDate, TimeSlotAvailabilityItem } from '../types';
 
 export type TimeSlotListResponse = StrictApiResponse<TimeSlot, true>;
 export type TimeSlotDetailResponse = StrictApiResponse<TimeSlot, false>;
@@ -36,5 +36,32 @@ export const timeslotsApi = {
 
 	deleteTimeSlot: async (roomId: string, timeslotId: string): Promise<void> => {
 		await mainApi.delete(`rooms/${roomId}/time-slots/${timeslotId}`);
+	},
+
+	getTimeSlotAvailability: async (roomId: string, startDay: string, endDay: string): Promise<TimeSlot[]> => {
+		const result = await mainApi
+			.get(`rooms/${roomId}/time-slots/availability`, {
+				searchParams: {
+					startDay,
+					endDay
+				}
+			})
+			.json<ApiResponse<TimeSlotAvailabilityDate[]>>();
+		
+		// Extract time slots from the nested structure
+		// The API returns an array of dates, each with timeSlots
+		// We need to flatten this and extract only the active ones
+		const availableSlots: TimeSlot[] = [];
+		
+		result.data.forEach((dateItem: TimeSlotAvailabilityDate) => {
+			dateItem.timeSlots.forEach((item: TimeSlotAvailabilityItem) => {
+				// Only include slots where isActive is true
+				if (item.isActive) {
+					availableSlots.push(item.timeSlot);
+				}
+			});
+		});
+		
+		return availableSlots;
 	}
 };

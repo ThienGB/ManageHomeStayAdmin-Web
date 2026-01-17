@@ -52,6 +52,17 @@ export type TimeSlot = {
 	updatedAt?: string;
 };
 
+// Availability response types
+export type TimeSlotAvailabilityItem = {
+	timeSlot: TimeSlot;
+	isActive: boolean;
+};
+
+export type TimeSlotAvailabilityDate = {
+	date: string;
+	timeSlots: TimeSlotAvailabilityItem[];
+};
+
 // Backwards compatibility aliases
 export type Attraction = Room;
 export type AttractionCategory = RoomCategory;

@@ -1,8 +1,11 @@
 'use client';
 
 import FuseSvgIcon from '@fuse/core/FuseSvgIcon';
-import { Chip, Paper, Typography } from '@mui/material';
+import { Box, Chip, Paper, Typography } from '@mui/material';
 import Grid from '@mui/material/Grid';
+import { DatePicker } from '@mui/x-date-pickers/DatePicker';
+import { useCallback, useState } from 'react';
+import { useTimeSlotAvailability } from '../../../api/hooks/useTimeSlotAvailability';
 
 type TimeSlot = {
 	id?: string;
@@ -14,10 +17,32 @@ type TimeSlot = {
 
 type RoomTimeSlotsProps = {
 	timeSlots: TimeSlot[];
+	roomId?: string;
 };
 
 function RoomTimeSlots(props: RoomTimeSlotsProps) {
-	const { timeSlots } = props;
+	const { timeSlots, roomId } = props;
+	const [selectedDate, setSelectedDate] = useState<Date | null>(new Date());
+
+	// Fetch available time slots for selected date
+	const { data: availableTimeSlots = [], isLoading: isLoadingAvailability } = useTimeSlotAvailability(
+		roomId || '',
+		selectedDate
+	);
+
+	// Helper function to check if a timeslot is available
+	const isTimeSlotAvailable = useCallback((timeslot: TimeSlot): boolean => {
+		if (!selectedDate || availableTimeSlots.length === 0) {
+			return true; // Default to available if no date selected or no data
+		}
+
+		// Check if this timeslot exists in the available slots
+		return availableTimeSlots.some(
+			(availableSlot) =>
+				availableSlot.startTime === timeslot.startTime &&
+				availableSlot.endTime === timeslot.endTime
+		);
+	}, [selectedDate, availableTimeSlots]);
 
 	if (!timeSlots || timeSlots.length === 0) {
 		return null;
@@ -34,64 +59,130 @@ function RoomTimeSlots(props: RoomTimeSlotsProps) {
 			>
 				Time Slots
 			</Typography>
+
+			{/* Date Picker for checking availability */}
+			{roomId && (
+				<Box className="mb-4">
+					<Paper sx={{ p: 2, bgcolor: 'background.default' }} elevation={0}>
+						<Box className="flex items-center gap-3">
+							<FuseSvgIcon size={20} color="action">lucide:calendar</FuseSvgIcon>
+							<Box className="flex-1">
+								<DatePicker
+									label="Kiểm tra tình trạng theo ngày"
+									value={selectedDate}
+									onChange={(newDate) => setSelectedDate(newDate)}
+									slotProps={{
+										textField: {
+											size: 'small',
+											fullWidth: true
+										}
+									}}
+								/>
+							</Box>
+							{isLoadingAvailability && (
+								<Typography variant="caption" color="text.secondary">
+									Đang kiểm tra...
+								</Typography>
+							)}
+						</Box>
+						<Typography variant="caption" color="text.secondary" className="mt-2 block">
+							Chọn ngày để xem khung giờ nào còn trống hoặc đã được đặt
+						</Typography>
+					</Paper>
+				</Box>
+			)}
+
 			<Grid
 				container
 				spacing={3}
 			>
-				{timeSlots.map((slot, idx) => (
-					<Grid
-						key={slot.id || idx}
-						size={{ sm: 12, md: 6 }}
-					>
-						<Paper
-							className="bg-gray-50 p-4 dark:bg-gray-800"
-							elevation={0}
+				{timeSlots.map((slot, idx) => {
+					const isAvailable = roomId ? isTimeSlotAvailable(slot) : true;
+
+					return (
+						<Grid
+							key={slot.id || idx}
+							size={{ sm: 12, md: 6 }}
 						>
-							<div className="mb-3 flex items-center justify-between">
-								<Typography
-									variant="h6"
-									className="font-semibold"
-								>
-									Slot {idx + 1}
-								</Typography>
-								{slot.isOvernight && (
-									<Chip
-										label="Overnight"
-										size="small"
-										color="primary"
-									/>
-								)}
-							</div>
-							<div className="space-y-2">
-								<div className="flex items-center gap-2">
-									<FuseSvgIcon
-										size={16}
-										className="text-gray-500"
-									>
-										lucide:clock
-									</FuseSvgIcon>
-									<Typography variant="body2">
-										{slot.startTime} - {slot.endTime}
-									</Typography>
-								</div>
-								<div className="flex items-center gap-2">
-									<FuseSvgIcon
-										size={16}
-										className="text-gray-500"
-									>
-										lucide:dollar-sign
-									</FuseSvgIcon>
+							<Paper
+								className="p-4"
+								elevation={0}
+								sx={{
+									bgcolor: isAvailable ? 'background.paper' : 'grey.50',
+									opacity: isAvailable ? 1 : 0.6,
+									borderWidth: 2,
+									borderStyle: 'solid',
+									borderColor: isAvailable ? 'success.light' : 'grey.300',
+									transition: 'all 0.2s ease-in-out'
+								}}
+							>
+								<div className="mb-3 flex items-center justify-between flex-wrap gap-2">
 									<Typography
-										variant="body2"
+										variant="h6"
 										className="font-semibold"
 									>
-										{slot.price?.toLocaleString() || 0} VND
+										Slot {idx + 1}
 									</Typography>
+									<Box className="flex gap-1 flex-wrap">
+										{slot.isOvernight && (
+											<Chip
+												label="Overnight"
+												size="small"
+												color="primary"
+												icon={<FuseSvgIcon size={14}>lucide:moon</FuseSvgIcon>}
+											/>
+										)}
+										{roomId && !isAvailable && (
+											<Chip
+												size="small"
+												label="Đã đặt"
+												color="error"
+												icon={<FuseSvgIcon size={14}>lucide:calendar-x</FuseSvgIcon>}
+												variant="filled"
+											/>
+										)}
+										{roomId && isAvailable && (
+											<Chip
+												size="small"
+												label="Có sẵn"
+												color="success"
+												icon={<FuseSvgIcon size={14}>lucide:calendar-check</FuseSvgIcon>}
+												variant="outlined"
+											/>
+										)}
+									</Box>
 								</div>
-							</div>
-						</Paper>
-					</Grid>
-				))}
+								<div className="space-y-2">
+									<div className="flex items-center gap-2">
+										<FuseSvgIcon
+											size={16}
+											className="text-gray-500"
+										>
+											lucide:clock
+										</FuseSvgIcon>
+										<Typography variant="body2">
+											{slot.startTime} - {slot.endTime}
+										</Typography>
+									</div>
+									<div className="flex items-center gap-2">
+										<FuseSvgIcon
+											size={16}
+											className="text-gray-500"
+										>
+											lucide:dollar-sign
+										</FuseSvgIcon>
+										<Typography
+											variant="body2"
+											className="font-semibold"
+										>
+											{slot.price?.toLocaleString() || 0} VND
+										</Typography>
+									</div>
+								</div>
+							</Paper>
+						</Grid>
+					);
+				})}
 			</Grid>
 		</Paper>
 	);

@@ -21,6 +21,7 @@ import {
 	Typography
 } from '@mui/material';
 import Grid from '@mui/material/Grid';
+import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { useCallback, useEffect, useState } from 'react';
 import {
 	Control,
@@ -32,6 +33,7 @@ import {
 	UseFormSetValue,
 	useWatch
 } from 'react-hook-form';
+import { useTimeSlotAvailability } from '../../../api/hooks/useTimeSlotAvailability';
 import TimeSlotModel from '../../../api/models/TimeSlotModel';
 
 type TimeSlot = {
@@ -55,6 +57,7 @@ type RoomTimeSlotsFormProps = {
 	roomId: string;
 	onSaveTimeSlot: (index: number, data: TimeSlot) => void;
 	onDeleteTimeSlot: (id: string | undefined, index: number) => void;
+	isViewMode?: boolean; // Only show availability in view mode
 };
 
 // Helper to format number with thousand separators
@@ -78,7 +81,8 @@ function TimeSlotRow({
 	getValues,
 	setValue,
 	onSave,
-	onDelete
+	onDelete,
+	isAvailable = true
 }: {
 	field: FieldArrayWithId<any, 'timeslots', 'id'>;
 	index: number;
@@ -87,6 +91,7 @@ function TimeSlotRow({
 	setValue: UseFormSetValue<any>;
 	onSave: (index: number, data: TimeSlot) => void;
 	onDelete: (id: string | undefined, index: number) => void;
+	isAvailable?: boolean;
 }) {
 	const [originalValues, setOriginalValues] = useState<TimeSlot | null>(null);
 	const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
@@ -130,26 +135,39 @@ function TimeSlotRow({
 
 	const status = getStatus();
 
-	// Status styles
+	// Status styles with availability
 	const getStatusStyles = () => {
+		// If unavailable, apply dimmed style
+		if (!isAvailable) {
+			return {
+				borderColor: 'grey.300',
+				borderWidth: 1,
+				bgcolor: 'grey.50',
+				opacity: 0.6
+			};
+		}
+
 		switch (status) {
 			case 'new':
 				return {
 					borderColor: 'success.main',
 					borderWidth: 2,
-					bgcolor: 'success.50'
+					bgcolor: 'success.50',
+					opacity: 1
 				};
 			case 'modified':
 				return {
 					borderColor: 'warning.main',
 					borderWidth: 2,
-					bgcolor: 'warning.50'
+					bgcolor: 'warning.50',
+					opacity: 1
 				};
 			default:
 				return {
-					borderColor: 'divider',
-					borderWidth: 1,
-					bgcolor: 'background.paper'
+					borderColor: 'success.light',
+					borderWidth: 2,
+					bgcolor: 'background.paper',
+					opacity: 1
 				};
 		}
 	};
@@ -225,6 +243,25 @@ function TimeSlotRow({
 							icon={<FuseSvgIcon size={14}>{statusInfo[status].icon}</FuseSvgIcon>}
 							variant={status === 'saved' ? 'outlined' : 'filled'}
 						/>
+						{/* Availability badge */}
+						{!isAvailable && (
+							<Chip
+								size="small"
+								label="Đã đặt"
+								color="error"
+								icon={<FuseSvgIcon size={14}>lucide:calendar-x</FuseSvgIcon>}
+								variant="filled"
+							/>
+						)}
+						{isAvailable && status === 'saved' && (
+							<Chip
+								size="small"
+								label="Có sẵn"
+								color="success"
+								icon={<FuseSvgIcon size={14}>lucide:calendar-check</FuseSvgIcon>}
+								variant="outlined"
+							/>
+						)}
 					</Box>
 
 					{/* Actions */}
@@ -386,7 +423,16 @@ function TimeSlotRow({
 }
 
 function RoomTimeSlotsForm(props: RoomTimeSlotsFormProps) {
-	const { control, fields, append, remove, getValues, setValue, roomId, onSaveTimeSlot, onDeleteTimeSlot } = props;
+	const { control, fields, append, remove, getValues, setValue, roomId, onSaveTimeSlot, onDeleteTimeSlot, isViewMode = false } = props;
+
+	// Date picker state
+	const [selectedDate, setSelectedDate] = useState<Date | null>(new Date());
+
+	// Fetch available time slots for selected date
+	const { data: availableTimeSlots = [], isLoading: isLoadingAvailability } = useTimeSlotAvailability(
+		roomId,
+		selectedDate
+	);
 
 	// Watch all timeslots to check for unsaved items
 	const watchedTimeslots = useWatch({
@@ -399,6 +445,21 @@ function RoomTimeSlotsForm(props: RoomTimeSlotsFormProps) {
 		const id = ts?.id || '';
 		return !id || id.startsWith('timeSlot-');
 	});
+
+	// Helper function to check if a timeslot is available
+	const isTimeSlotAvailable = useCallback((timeslot: TimeSlot): boolean => {
+		if (!selectedDate || availableTimeSlots.length === 0) {
+			return true; // Default to available if no date selected or no data
+		}
+
+		// Check if this timeslot exists in the available slots
+		// Match by startTime and endTime
+		return availableTimeSlots.some(
+			(availableSlot) =>
+				availableSlot.startTime === timeslot.startTime &&
+				availableSlot.endTime === timeslot.endTime
+		);
+	}, [selectedDate, availableTimeSlots]);
 
 	const handleAddTimeSlot = () => {
 		append(
@@ -450,6 +511,38 @@ function RoomTimeSlotsForm(props: RoomTimeSlotsFormProps) {
 				</Tooltip>
 			</Box>
 
+			{/* Date Picker for checking availability - Only in view mode */}
+			{isViewMode && (
+				<Box className="mb-4">
+					<Paper sx={{ p: 2, bgcolor: 'background.default' }} elevation={0}>
+						<Box className="flex items-center gap-3">
+							<FuseSvgIcon size={20} color="action">lucide:calendar</FuseSvgIcon>
+							<Box className="flex-1">
+								<DatePicker
+									label="Kiểm tra tình trạng theo ngày"
+									value={selectedDate}
+									onChange={(newDate) => setSelectedDate(newDate)}
+									slotProps={{
+										textField: {
+											size: 'small',
+											fullWidth: true
+										}
+									}}
+								/>
+							</Box>
+							{isLoadingAvailability && (
+								<Typography variant="caption" color="text.secondary">
+									Đang kiểm tra...
+								</Typography>
+							)}
+						</Box>
+						<Typography variant="caption" color="text.secondary" className="mt-2 block">
+							Chọn ngày để xem khung giờ nào còn trống hoặc đã được đặt
+						</Typography>
+					</Paper>
+				</Box>
+			)}
+
 			{/* Empty state */}
 			{fields.length === 0 && (
 				<Alert
@@ -462,18 +555,24 @@ function RoomTimeSlotsForm(props: RoomTimeSlotsFormProps) {
 
 			{/* Timeslots list */}
 			<div className="space-y-3">
-				{fields.map((field, index) => (
-					<TimeSlotRow
-						key={field.id}
-						field={field}
-						index={index}
-						control={control}
-						getValues={getValues}
-						setValue={setValue}
-						onSave={onSaveTimeSlot}
-						onDelete={handleDelete}
-					/>
-				))}
+				{fields.map((field, index) => {
+					const timeslot = watchedTimeslots?.[index];
+					const isAvailable = timeslot ? isTimeSlotAvailable(timeslot) : true;
+
+					return (
+						<TimeSlotRow
+							key={field.id}
+							field={field}
+							index={index}
+							control={control}
+							getValues={getValues}
+							setValue={setValue}
+							onSave={onSaveTimeSlot}
+							onDelete={handleDelete}
+							isAvailable={isAvailable}
+						/>
+					);
+				})}
 			</div>
 
 			{/* Helper text */}

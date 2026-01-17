@@ -30,14 +30,14 @@ import useRoomImages, { FormImage } from '../../hooks/useRoomImages';
 
 // Import refactored components
 import {
-	RoomAmenities,
-	RoomAmenitiesForm,
-	RoomBasicInfoForm,
-	RoomImageGallery,
-	RoomImagesForm,
-	RoomInfo,
-	RoomTimeSlots,
-	RoomTimeSlotsForm
+    RoomAmenities,
+    RoomAmenitiesForm,
+    RoomBasicInfoForm,
+    RoomImageGallery,
+    RoomImagesForm,
+    RoomInfo,
+    RoomTimeSlots,
+    RoomTimeSlotsForm
 } from '../ui/room';
 
 const schema = z
@@ -482,7 +482,7 @@ function RoomView(props: RoomViewProps) {
 								)}
 
 								{/* TimeSlots Section */}
-								{timeSlots && timeSlots.length > 0 && <RoomTimeSlots timeSlots={timeSlots} />}
+								{timeSlots && timeSlots.length > 0 && <RoomTimeSlots timeSlots={timeSlots} roomId={roomId} />}
 							</Grid>
 						</Grid>
 					</div>
@@ -553,6 +553,7 @@ function RoomView(props: RoomViewProps) {
 								onSaveTimeSlot={handleSaveTimeSlot}
 								onDeleteTimeSlot={handleDeleteTimeSlot}
 								setValue={setTimeSlotValue}
+								isViewMode={false}
 							/>
 						</div>
 					</Paper>
