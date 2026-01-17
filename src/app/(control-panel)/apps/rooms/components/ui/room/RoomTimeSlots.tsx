@@ -1,10 +1,11 @@
 'use client';
 
 import FuseSvgIcon from '@fuse/core/FuseSvgIcon';
-import { Box, Chip, Paper, Typography } from '@mui/material';
+import { Box, Button, Chip, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, Paper, Typography } from '@mui/material';
 import Grid from '@mui/material/Grid';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { useCallback, useState } from 'react';
+import { useCreateBooking } from '../../../api/hooks/useCreateBooking';
 import { useTimeSlotAvailability } from '../../../api/hooks/useTimeSlotAvailability';
 
 type TimeSlot = {
@@ -30,6 +31,12 @@ function RoomTimeSlots(props: RoomTimeSlotsProps) {
 		selectedDate
 	);
 
+	// Booking mutation
+	const { mutate: createBooking, isPending: isBooking } = useCreateBooking();
+
+	// Dialog state
+	const [bookingDialog, setBookingDialog] = useState<{ open: boolean; slot: TimeSlot | null }>({ open: false, slot: null });
+
 	// Helper function to check if a timeslot is available
 	const isTimeSlotAvailable = useCallback((timeslot: TimeSlot): boolean => {
 		if (!selectedDate || availableTimeSlots.length === 0) {
@@ -43,6 +50,30 @@ function RoomTimeSlots(props: RoomTimeSlotsProps) {
 				availableSlot.endTime === timeslot.endTime
 		);
 	}, [selectedDate, availableTimeSlots]);
+
+	// Handle booking
+	const handleBookSlot = (slot: TimeSlot) => {
+		setBookingDialog({ open: true, slot });
+	};
+
+	const handleConfirmBooking = () => {
+		if (!bookingDialog.slot || !roomId || !selectedDate) return;
+
+		const dateString = selectedDate.toISOString().split('T')[0];
+
+		createBooking(
+			{
+				roomId,
+				timeSlotId: bookingDialog.slot.id!,
+				date: dateString
+			},
+			{
+				onSuccess: () => {
+					setBookingDialog({ open: false, slot: null });
+				}
+			}
+		);
+	};
 
 	if (!timeSlots || timeSlots.length === 0) {
 		return null;
@@ -178,12 +209,68 @@ function RoomTimeSlots(props: RoomTimeSlotsProps) {
 											{slot.price?.toLocaleString() || 0} VND
 										</Typography>
 									</div>
+
+									{/* Book Button for available slots */}
+									{roomId && isAvailable && selectedDate && (
+										<div className="mt-3">
+											<Button
+												variant="contained"
+												color="primary"
+												size="small"
+												fullWidth
+												onClick={() => handleBookSlot(slot)}
+												startIcon={<FuseSvgIcon size={16}>lucide:calendar-plus</FuseSvgIcon>}
+											>
+												Book Slot
+											</Button>
+										</div>
+									)}
 								</div>
 							</Paper>
 						</Grid>
 					);
 				})}
 			</Grid>
+
+			{/* Booking Confirmation Dialog */}
+			<Dialog
+				open={bookingDialog.open}
+				onClose={() => !isBooking && setBookingDialog({ open: false, slot: null })}
+			>
+				<DialogTitle>Xác nhận đặt phòng</DialogTitle>
+				<DialogContent>
+					<DialogContentText>
+						Bạn có chắc muốn đặt khung giờ này không?
+						<br />
+						<strong>Thời gian:</strong> {bookingDialog.slot?.startTime} - {bookingDialog.slot?.endTime}
+						<br />
+						<strong>Ngày:</strong> {selectedDate?.toLocaleDateString('vi-VN')}
+					</DialogContentText>
+				</DialogContent>
+				<DialogActions>
+					<Button 
+						onClick={() => setBookingDialog({ open: false, slot: null })}
+						disabled={isBooking}
+					>
+						Hủy
+					</Button>
+					<Button
+						onClick={handleConfirmBooking}
+						color="primary"
+						variant="contained"
+						disabled={isBooking}
+						startIcon={
+							isBooking ? (
+								<FuseSvgIcon size={16}>lucide:loader-2</FuseSvgIcon>
+							) : (
+								<FuseSvgIcon size={16}>lucide:check</FuseSvgIcon>
+							)
+						}
+					>
+						{isBooking ? 'Đang đặt...' : 'Xác nhận'}
+					</Button>
+				</DialogActions>
+			</Dialog>
 		</Paper>
 	);
 }

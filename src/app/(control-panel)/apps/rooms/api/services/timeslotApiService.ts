@@ -38,12 +38,12 @@ export const timeslotsApi = {
 		await mainApi.delete(`rooms/${roomId}/time-slots/${timeslotId}`);
 	},
 
-	getTimeSlotAvailability: async (roomId: string, startDay: string, endDay: string): Promise<TimeSlot[]> => {
+	getTimeSlotAvailability: async (roomId: string, startDate: string, endDate: string): Promise<TimeSlot[]> => {
 		const result = await mainApi
 			.get(`rooms/${roomId}/time-slots/availability`, {
 				searchParams: {
-					startDay,
-					endDay
+					startDate,
+					endDate
 				}
 			})
 			.json<ApiResponse<TimeSlotAvailabilityDate[]>>();
