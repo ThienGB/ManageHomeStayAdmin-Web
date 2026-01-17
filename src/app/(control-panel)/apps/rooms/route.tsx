@@ -4,7 +4,7 @@ import { lazy } from 'react';
 import { Outlet } from 'react-router';
 
 const RoomsAppView = lazy(() => import('./components/views/RoomsAppView'));
-const RoomView = lazy(() => import('./components/views/room/RoomView'));
+const RoomView = lazy(() => import('./components/views/RoomView'));
 
 /**
  * The Rooms App Route (renamed from Attractions)
@@ -18,9 +18,18 @@ const route: FuseRouteItemType = {
 			path: '',
 			element: <RoomsAppView />
 		},
+
+		{
+			path: 'edit/:roomId',
+			element: <RoomView mode="edit" />
+		},
+		{
+			path: 'add',
+			element: <RoomView mode="create" />
+		},
 		{
 			path: ':roomId',
-			element: <RoomView />
+			element: <RoomView mode="view" />
 		}
 	]
 };

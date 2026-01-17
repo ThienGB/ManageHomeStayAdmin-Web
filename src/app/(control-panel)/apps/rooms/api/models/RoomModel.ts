@@ -1,43 +1,23 @@
 import _ from 'lodash';
 import { PartialDeep } from 'type-fest';
-import { Attraction } from '../types';
+import { Room } from '../types';
 
-const AttractionModel = (data: PartialDeep<Attraction>) =>
+const RoomModel = (data: PartialDeep<Room>) =>
 	_.defaults(data || {}, {
-		id: _.uniqueId('attraction-'),
+		id: _.uniqueId('room-'),
+		isDeleted: false,
+		createdAt: new Date().toISOString(),
+		updatedAt: new Date().toISOString(),
 		name: '',
 		description: '',
-		category: '',
-		location: {
-			city: '',
-			state: '',
-			country: '',
-			latitude: 0,
-			longitude: 0
-		},
-		rating: 0,
-		reviewCount: 0,
-		price: {
-			amount: 0,
-			currency: 'USD',
-			type: 'per person'
-		},
+		capacity: 0,
+		bed: 0,
+		area: 0,
 		images: [],
-		openingHours: {
-			monday: '9:00 AM - 5:00 PM',
-			tuesday: '9:00 AM - 5:00 PM',
-			wednesday: '9:00 AM - 5:00 PM',
-			thursday: '9:00 AM - 5:00 PM',
-			friday: '9:00 AM - 5:00 PM',
-			saturday: '10:00 AM - 4:00 PM',
-			sunday: 'Closed'
-		},
-		tags: [],
+		isActive: true,
 		amenities: [],
-		featured: false,
-		status: 'draft',
-		created_at: new Date().toISOString(),
-		updated_at: new Date().toISOString()
+		hourlyRate: 0,
+		overnightRate: 0
 	});
 
-export default AttractionModel;
+export default RoomModel;

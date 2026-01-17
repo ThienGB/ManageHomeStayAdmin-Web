@@ -1,7 +1,7 @@
 import FuseLoading from '@fuse/core/FuseLoading';
 import FuseSvgIcon from '@fuse/core/FuseSvgIcon';
 import Link from '@fuse/core/Link';
-import { Chip, ListItemIcon, MenuItem, Paper, Rating } from '@mui/material';
+import { Chip, ListItemIcon, MenuItem, Paper } from '@mui/material';
 import Typography from '@mui/material/Typography';
 import { type MRT_ColumnDef } from 'material-react-table';
 import { useMemo } from 'react';
@@ -12,7 +12,7 @@ import { useRoomsAppContext } from '../../context/rooms-context/useRoomsAppConte
 
 function RoomsTable() {
 	const { pagination, setPagination, filters } = useRoomsAppContext();
-	
+
 	const { data, isLoading } = useRooms({
 		...pagination,
 		...filters
@@ -96,9 +96,7 @@ function RoomsTable() {
 					};
 
 					const nextState =
-						typeof updaterOrValue === 'function'
-							? updaterOrValue(currentState)
-							: updaterOrValue;
+						typeof updaterOrValue === 'function' ? updaterOrValue(currentState) : updaterOrValue;
 
 					setPagination({
 						page: (nextState.pageIndex ?? 0) + 1,

@@ -11,7 +11,7 @@ import { useEffect, useState } from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Controller, FormProvider, useFieldArray, useForm } from 'react-hook-form';
 import { z } from 'zod';
-import { useRoom } from '../../../api/hooks/useRoom';
+import { useRoom } from '../../api/hooks/useRoom';
 
 import { useGlobalContext } from '@/contexts/GlobalContext/useGlobalContext';
 import FuseSvgIcon from '@fuse/core/FuseSvgIcon';
@@ -23,27 +23,39 @@ import {
 	Divider,
 	FormControlLabel,
 	IconButton,
+	InputAdornment,
 	Paper,
 	TextField
 } from '@mui/material';
 import Grid from '@mui/material/Grid';
-import { useAmenities } from '../../../api/hooks/useAmenities';
-import { useCreateRoom } from '../../../api/hooks/useCreateRoom';
-import { useCreateTimeSlot } from '../../../api/hooks/useCreateTimeSlot';
-import { useDeleteTimeSlot } from '../../../api/hooks/useDeleteTimeSlot';
-import { useTimeSlots } from '../../../api/hooks/useTimeSlots';
-import { useUpdateRoom } from '../../../api/hooks/useUpdateRoom';
-import { useUpdateTimeSlot } from '../../../api/hooks/useUpdateTimeSlot';
-import TimeSlotModel from '../../../api/models/TimeSlotModel';
+import { useNavigate } from 'react-router';
+import { useAmenities } from '../../api/hooks/useAmenities';
+import { useCreateRoom } from '../../api/hooks/useCreateRoom';
+import { useCreateTimeSlot } from '../../api/hooks/useCreateTimeSlot';
+import { useDeleteTimeSlot } from '../../api/hooks/useDeleteTimeSlot';
+import { useTimeSlots } from '../../api/hooks/useTimeSlots';
+import { useUpdateRoom } from '../../api/hooks/useUpdateRoom';
+import { useUpdateTimeSlot } from '../../api/hooks/useUpdateTimeSlot';
+import RoomModel from '../../api/models/RoomModel';
+import TimeSlotModel from '../../api/models/TimeSlotModel';
 
 const schema = z
 	.object({
 		name: z.string().min(3, 'Name must be at least 3 characters'),
 		description: z.string().min(10, 'Description must be at least 10 characters'),
-		price: z.number().min(0, 'Price must be positive'),
-		status: z.enum(['PENDING', 'APPROVED', 'REJECTED']),
-		amenities: z.array(z.string()).optional(),
-		timeslots: z.array(
+		hourlyRate: z.number().min(0, 'Hourly rate must be positive'),
+		overnightRate: z.number().min(0, 'Overnight rate must be positive'),
+		isActive: z.boolean(),
+		capacity: z.number().min(1, 'Capacity must be at least 1'),
+		numberOfBeds: z.number().min(0, 'Bed count must be positive'),
+		area: z.number().min(0, 'Area must be positive'),
+		amenityIds: z.array(z.string()).optional()
+	})
+	.passthrough(); // Allow additional fields
+
+const timeSlotSchema = z.object({
+	timeslots: z
+		.array(
 			z.object({
 				id: z.string().optional(),
 				startTime: z.string().optional(),
@@ -51,36 +63,50 @@ const schema = z
 				price: z.number().optional(),
 				isOvernight: z.boolean().optional()
 			})
-		).default([])
-	})
-	.passthrough(); // Allow additional fields
+		)
+		.default([])
+});
 
-function RoomView() {
+type RoomViewProps = {
+	mode?: 'create' | 'edit' | 'view';
+};
+
+function RoomView(props: RoomViewProps) {
+	const { mode } = props;
 	const routeParams = useParams();
 	const { roomId } = routeParams as { roomId: string };
 	const { data: room, isLoading, isError } = useRoom(roomId);
 
-	const isCreateMode = (roomId || '').toLowerCase() === 'new';
-	const [isEditMode, setIsEditMode] = useState(isCreateMode);
+	const isCreateMode = mode === 'create' || !roomId || roomId === 'new' || roomId === 'add';
+	const [isEditMode, setIsEditMode] = useState(
+		mode === 'edit' || (mode !== 'view' && (isCreateMode || window.location.pathname.includes('/edit/')))
+	);
 	const [currentImageIndex, setCurrentImageIndex] = useState(0);
 	const [amenitySearch, setAmenitySearch] = useState('');
 
-	const { data: amenities } = useAmenities(amenitySearch);
 	const { data: timeSlots } = useTimeSlots(roomId);
+	const { data: amenities } = useAmenities(amenitySearch);
 	const { mutate: updateRoom } = useUpdateRoom();
 	const { mutate: createRoom } = useCreateRoom();
 	const { mutate: createTimeSlot } = useCreateTimeSlot();
 	const { mutate: updateTimeSlot } = useUpdateTimeSlot();
 	const { mutate: deleteTimeSlot } = useDeleteTimeSlot();
+
 	const { openModal } = useGlobalContext();
+	const navigate = useNavigate();
 
 	type FormValues = z.infer<typeof schema>;
 
 	const methods = useForm<FormValues>({
 		mode: 'onChange',
-		// defaultValues may be filled from server data via `reset`.
-		defaultValues: {} as Partial<FormValues>,
+		defaultValues: RoomModel({}) as unknown as Partial<FormValues>,
 		resolver: zodResolver(schema)
+	});
+
+	const timeSlotMethods = useForm<z.infer<typeof timeSlotSchema>>({
+		mode: 'onChange',
+		defaultValues: { timeslots: [] },
+		resolver: zodResolver(timeSlotSchema)
 	});
 
 	const {
@@ -90,25 +116,45 @@ function RoomView() {
 		formState: { errors }
 	} = methods;
 
-	const { fields: timeslotFields, append: appendTimeSlot, remove: removeTimeSlot } = useFieldArray({
-		control,
+	const {
+		reset: resetTimeSlots,
+		control: controlTimeSlots,
+		watch: watchTimeSlots,
+		getValues: getTimeSlotValues,
+		formState: { errors: errorsTimeSlots }
+	} = timeSlotMethods;
+
+	const {
+		fields: timeSlotFields,
+		append: appendTimeSlot,
+		remove: removeTimeSlot
+	} = useFieldArray({
+		control: controlTimeSlots,
 		name: 'timeslots'
 	});
 
 	useEffect(() => {
 		if (room) {
-			// Helper function to extract time in HH:mm format from various datetime formats
+			// Normalize certain nested fields so the form values match our schema.
+			const normalized = {
+				...room,
+				amenityIds: room.amenities
+					? room.amenities.map((a: any) => (typeof a === 'string' ? a : a.id || a._id || a))
+					: []
+			};
+
 			const normalizeTime = (timeString?: string): string | undefined => {
 				if (!timeString) return undefined;
-				
+
 				// If it's already in HH:mm format, return as is
 				if (/^\d{2}:\d{2}$/.test(timeString)) {
 					return timeString;
 				}
-				
+
 				// If it's a full datetime string, extract time part
 				try {
 					const date = new Date(timeString);
+
 					if (!isNaN(date.getTime())) {
 						const hours = date.getHours().toString().padStart(2, '0');
 						const minutes = date.getMinutes().toString().padStart(2, '0');
@@ -117,41 +163,67 @@ function RoomView() {
 				} catch (e) {
 					// If parsing fails, try to extract HH:mm from string
 					const match = timeString.match(/(\d{2}):(\d{2})/);
+
 					if (match) {
 						return `${match[1]}:${match[2]}`;
 					}
 				}
-				
+
 				return timeString;
 			};
 
-			// Normalize certain nested fields so the form values match our schema.
-			const normalized = {
-				...room,
-				amenities: room.amenities
-					? room.amenities.map((a: any) => (typeof a === 'string' ? a : a.id || a._id || a))
-					: [],
-				timeslots: timeSlots 
-					? timeSlots.map((slot: any) => ({
-						...slot,
-						startTime: normalizeTime(slot.startTime),
-						endTime: normalizeTime(slot.endTime)
-					}))
-					: []
-			};
+			const normalizedTimeSlots = (timeSlots || []).map((ts: any) => ({
+				id: ts.id,
+				startTime: normalizeTime(ts.startTime),
+				endTime: normalizeTime(ts.endTime),
+				price: ts.price,
+				isOvernight: ts.isOvernight
+			}));
 
 			reset(normalized as any);
+			resetTimeSlots({ timeslots: normalizedTimeSlots });
 		}
-	}, [room, timeSlots, reset]);
+	}, [room, timeSlots, reset, resetTimeSlots]);
 
 	const statusColor = room?.isActive ? 'success' : 'error';
 
 	const handleSave = (data: any) => {
 		if (isCreateMode) {
-			createRoom(data);
+			const roomData = {
+				name: data.name,
+				description: data.description,
+				capacity: data.capacity,
+				numberOfBeds: data.numberOfBeds,
+				area: data.area,
+				images: (data.images || []).map((img: any) => ({
+					url: typeof img === 'string' ? img : img.url
+				})),
+				isActive: data.isActive,
+				amenityIds: data.amenityIds || [],
+				hourlyRate: data.hourlyRate,
+				overnightRate: data.overnightRate
+			};
+			createRoom(roomData);
 		} else {
-			updateRoom({ roomId, data });
+			const roomData = {
+				id: roomId,
+				name: data.name,
+				description: data.description,
+				capacity: data.capacity,
+				numberOfBeds: data.numberOfBeds,
+				amenityIds: data.amenityIds || [],
+				area: data.area,
+				images: (data.images || []).map((img: any) => ({
+					id: img.id,
+					url: img.url
+				})),
+				isActive: data.isActive,
+				hourlyRate: data.hourlyRate,
+				overnightRate: data.overnightRate
+			};
+			updateRoom({ roomId, data: roomData });
 		}
+
 		setIsEditMode(false);
 	};
 
@@ -219,7 +291,10 @@ function RoomView() {
 							<Button
 								variant="contained"
 								color="secondary"
-								onClick={() => setIsEditMode(true)}
+								onClick={() => {
+									navigate(`/apps/rooms/edit/${roomId}`);
+									setIsEditMode(true);
+								}}
 								startIcon={<FuseSvgIcon>lucide:edit</FuseSvgIcon>}
 							>
 								Edit
@@ -309,11 +384,10 @@ function RoomView() {
 													e.stopPropagation();
 													setCurrentImageIndex(idx);
 												}}
-												className={`h-16 w-16 overflow-hidden rounded border-2 transition-all ${
-													idx === currentImageIndex
+												className={`h-16 w-16 overflow-hidden rounded border-2 transition-all ${idx === currentImageIndex
 														? 'scale-110 border-white'
 														: 'border-transparent opacity-70'
-												}`}
+													}`}
 											>
 												<img
 													src={img.url}
@@ -391,6 +465,7 @@ function RoomView() {
 											</FuseSvgIcon>
 										</div>
 									</div>
+
 									<div className="flex items-center gap-2">
 										<Typography variant="body2">{room?.area} m²</Typography>
 										<div className="bg-primary/10 flex h-8 w-8 items-center justify-center rounded-full">
@@ -400,6 +475,42 @@ function RoomView() {
 											>
 												lucide:area
 											</FuseSvgIcon>
+										</div>
+									</div>
+									<div className="mt-4 flex flex-col gap-2">
+										<div className="flex items-center justify-between">
+											<Typography
+												variant="body2"
+												color="text.secondary"
+											>
+												Hourly Rate:
+											</Typography>
+											<Typography
+												variant="body1"
+												fontWeight="bold"
+											>
+												{room?.hourlyRate?.toLocaleString('vi-VN', {
+													style: 'currency',
+													currency: 'VND'
+												})}
+											</Typography>
+										</div>
+										<div className="flex items-center justify-between">
+											<Typography
+												variant="body2"
+												color="text.secondary"
+											>
+												Overnight Rate:
+											</Typography>
+											<Typography
+												variant="body1"
+												fontWeight="bold"
+											>
+												{room?.overnightRate?.toLocaleString('vi-VN', {
+													style: 'currency',
+													currency: 'VND'
+												})}
+											</Typography>
 										</div>
 									</div>
 								</Paper>
@@ -431,7 +542,7 @@ function RoomView() {
 																size={16}
 																className="text-primary"
 															>
-																lucide:vector-square
+																{amenity.icon}
 															</FuseSvgIcon>
 														</div>
 														<Typography variant="body2">{amenity.name}</Typography>
@@ -467,7 +578,7 @@ function RoomView() {
 														className="bg-gray-50 p-4 dark:bg-gray-800"
 														elevation={0}
 													>
-														<div className="flex items-center justify-between mb-3">
+														<div className="mb-3 flex items-center justify-between">
 															<Typography
 																variant="h6"
 																className="font-semibold"
@@ -501,7 +612,10 @@ function RoomView() {
 																>
 																	lucide:dollar-sign
 																</FuseSvgIcon>
-																<Typography variant="body2" className="font-semibold">
+																<Typography
+																	variant="body2"
+																	className="font-semibold"
+																>
 																	{slot.price?.toLocaleString() || 0} VND
 																</Typography>
 															</div>
@@ -522,7 +636,7 @@ function RoomView() {
 							variant="h4"
 							className="mb-6 font-bold"
 						>
-							Edit Room
+							{isCreateMode ? 'Add Room' : 'Edit Room'}
 						</Typography>
 
 						<div className="space-y-6">
@@ -582,6 +696,18 @@ function RoomView() {
 													label="Room Capacity"
 													fullWidth
 													required
+													value={
+														field.value
+															? String(field.value).replace(/\B(?=(\d{3})+(?!\d))/g, '.')
+															: ''
+													}
+													onChange={(e) => {
+														const rawValue = e.target.value.replace(/\./g, '');
+
+														if (!isNaN(Number(rawValue))) {
+															field.onChange(Number(rawValue));
+														}
+													}}
 													error={!!errors.capacity}
 													helperText={errors.capacity?.message as string}
 												/>
@@ -590,7 +716,7 @@ function RoomView() {
 									</Grid>
 									<Grid size={{ sm: 12, md: 12 }}>
 										<Controller
-											name="bed"
+											name="numberOfBeds"
 											control={control}
 											render={({ field }) => (
 												<TextField
@@ -598,6 +724,18 @@ function RoomView() {
 													label="Number of Beds"
 													fullWidth
 													required
+													value={
+														field.value
+															? String(field.value).replace(/\B(?=(\d{3})+(?!\d))/g, '.')
+															: ''
+													}
+													onChange={(e) => {
+														const rawValue = e.target.value.replace(/\./g, '');
+
+														if (!isNaN(Number(rawValue))) {
+															field.onChange(Number(rawValue));
+														}
+													}}
 													error={!!errors.bed}
 													helperText={errors.bed?.message as string}
 												/>
@@ -614,8 +752,106 @@ function RoomView() {
 													label="Area"
 													fullWidth
 													required
+													value={
+														field.value
+															? String(field.value).replace(/\B(?=(\d{3})+(?!\d))/g, '.')
+															: ''
+													}
+													onChange={(e) => {
+														const rawValue = e.target.value.replace(/\./g, '');
+
+														if (!isNaN(Number(rawValue))) {
+															field.onChange(Number(rawValue));
+														}
+													}}
+													InputProps={{
+														endAdornment: <InputAdornment position="end">m²</InputAdornment>
+													}}
 													error={!!errors.area}
 													helperText={errors.area?.message as string}
+												/>
+											)}
+										/>
+									</Grid>
+									<Grid size={{ sm: 12, md: 6 }}>
+										<Controller
+											name="hourlyRate"
+											control={control}
+											render={({ field }) => (
+												<TextField
+													{...field}
+													label="Hourly Rate"
+													fullWidth
+													required
+													value={
+														field.value
+															? String(field.value).replace(/\B(?=(\d{3})+(?!\d))/g, '.')
+															: ''
+													}
+													onChange={(e) => {
+														const rawValue = e.target.value.replace(/\./g, '');
+
+														if (!isNaN(Number(rawValue))) {
+															field.onChange(Number(rawValue));
+														}
+													}}
+													InputProps={{
+														endAdornment: (
+															<InputAdornment position="end">VND</InputAdornment>
+														)
+													}}
+													error={!!errors.hourlyRate}
+													helperText={errors.hourlyRate?.message as string}
+												/>
+											)}
+										/>
+									</Grid>
+									<Grid size={{ sm: 12, md: 6 }}>
+										<Controller
+											name="overnightRate"
+											control={control}
+											render={({ field }) => (
+												<TextField
+													{...field}
+													label="Overnight Rate"
+													fullWidth
+													required
+													value={
+														field.value
+															? String(field.value).replace(/\B(?=(\d{3})+(?!\d))/g, '.')
+															: ''
+													}
+													onChange={(e) => {
+														const rawValue = e.target.value.replace(/\./g, '');
+
+														if (!isNaN(Number(rawValue))) {
+															field.onChange(Number(rawValue));
+														}
+													}}
+													InputProps={{
+														endAdornment: (
+															<InputAdornment position="end">VND</InputAdornment>
+														)
+													}}
+													error={!!errors.overnightRate}
+													helperText={errors.overnightRate?.message as string}
+												/>
+											)}
+										/>
+									</Grid>
+									<Grid size={{ sm: 12, md: 12 }}>
+										<Controller
+											name="isActive"
+											control={control}
+											render={({ field }) => (
+												<FormControlLabel
+													control={
+														<Checkbox
+															checked={field.value}
+															onChange={(e) => field.onChange(e.target.checked)}
+														/>
+													}
+													label="Active"
 												/>
 											)}
 										/>
@@ -638,7 +874,7 @@ function RoomView() {
 								>
 									<Grid size={{ sm: 12, md: 12 }}>
 										<Controller
-											name="amenities"
+											name="amenityIds"
 											control={control}
 											render={({ field }) => (
 												<Grid
@@ -665,10 +901,12 @@ function RoomView() {
 																			checked={checked}
 																			onChange={(e) => {
 																				const ids = currentIds.slice();
+
 																				if (e.target.checked) {
 																					// add id if not present
 																					if (!ids.includes(amenity.id))
 																						ids.push(amenity.id);
+
 																					field.onChange(ids);
 																				} else {
 																					// remove id
@@ -711,8 +949,8 @@ function RoomView() {
 										onClick={() =>
 											appendTimeSlot(
 												TimeSlotModel({
-													startTime: "09:00",
-													endTime: "17:00",
+													startTime: '09:00',
+													endTime: '17:00',
 													price: 0,
 													roomId: room.id,
 													isOvernight: false
@@ -725,7 +963,7 @@ function RoomView() {
 								</div>
 
 								<div className="space-y-4">
-									{timeslotFields.map((field, index) => (
+									{timeSlotFields.map((field, index) => (
 										<Paper
 											key={field.id}
 											className="bg-gray-50 p-4 dark:bg-gray-900"
@@ -740,13 +978,15 @@ function RoomView() {
 														<Grid size={{ sm: 12, md: 2 }}>
 															<Controller
 																name={`timeslots.${index}.isOvernight`}
-																control={control}
+																control={controlTimeSlots}
 																render={({ field }) => (
 																	<FormControlLabel
 																		control={
 																			<Checkbox
 																				checked={!!field.value}
-																				onChange={(e) => field.onChange(e.target.checked)}
+																				onChange={(e) =>
+																					field.onChange(e.target.checked)
+																				}
 																			/>
 																		}
 																		label="Overnight"
@@ -757,7 +997,7 @@ function RoomView() {
 														<Grid size={{ sm: 12, md: 3 }}>
 															<Controller
 																name={`timeslots.${index}.startTime`}
-																control={control}
+																control={controlTimeSlots}
 																render={({ field }) => (
 																	<TextField
 																		{...field}
@@ -775,7 +1015,7 @@ function RoomView() {
 														<Grid size={{ sm: 12, md: 3 }}>
 															<Controller
 																name={`timeslots.${index}.endTime`}
-																control={control}
+																control={controlTimeSlots}
 																render={({ field }) => (
 																	<TextField
 																		{...field}
@@ -793,7 +1033,7 @@ function RoomView() {
 														<Grid size={{ sm: 12, md: 3 }}>
 															<Controller
 																name={`timeslots.${index}.price`}
-																control={control}
+																control={controlTimeSlots}
 																render={({ field }) => (
 																	<TextField
 																		{...field}
@@ -804,69 +1044,80 @@ function RoomView() {
 																		InputLabelProps={{
 																			shrink: true
 																		}}
-																		onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
+																		onChange={(e) =>
+																			field.onChange(
+																				parseFloat(e.target.value) || 0
+																			)
+																		}
 																	/>
 																)}
 															/>
 														</Grid>
 													</Grid>
 												</div>
-									<div className="flex gap-2">
-										<IconButton
-											size="small"
-											color="primary"
-											onClick={() => {
-												const timeslotData = watch(`timeslots.${index}`);
-												// Check if it's a new timeslot (local ID) or existing (server ID)
-												if (timeslotData.id && timeslotData.id.startsWith('timeSlot-')) {
-													// New timeslot - create via API
-													createTimeSlot({ 
-														roomId, 
-														data: {
-															startTime: timeslotData.startTime,
-															endTime: timeslotData.endTime,
-															price: timeslotData.price,
-															roomId: room.id,
-															status: 'AVAILABLE',
-															isOvernight: timeslotData.isOvernight
-														}
-													});
-												} else if (timeslotData.id) {
-													// Existing timeslot - update via API
-													updateTimeSlot({ 
-														timeslotId: timeslotData.id,
-														roomId: room.id,
-														data: {
-															startTime: timeslotData.startTime,
-															endTime: timeslotData.endTime,
-															price: timeslotData.price,
-															roomId: room.id,
-															status: 'AVAILABLE',
-															isOvernight: timeslotData.isOvernight
-														}
-													});
-												}
-											}}
-										>
-											<FuseSvgIcon>lucide:save</FuseSvgIcon>
-										</IconButton>
-										<IconButton
-											size="small"
-											color="error"
-											onClick={() => {
-												// Only call API if ID exists and is not a local temp ID
-												if (field.id && !field.id.startsWith('timeSlot-')) {
-													// Existing timeslot from server - delete via API
-													deleteTimeSlot({ timeslotId: field.id, roomId });
-												}
-												// Always remove from form array
-												removeTimeSlot(index);
-											}}
-										>
-											<FuseSvgIcon>lucide:trash-2</FuseSvgIcon>
-										</IconButton>
-									</div>
-								</div>
+												<div className="flex gap-2">
+													<IconButton
+														size="small"
+														color="primary"
+														onClick={() => {
+															const timeslotData = getTimeSlotValues(
+																`timeslots.${index}`
+															);
+
+															// Check if it's a new timeslot (local ID) or existing (server ID)
+															if (
+																timeslotData.id &&
+																timeslotData.id.startsWith('timeSlot-')
+															) {
+																// New timeslot - create via API
+																createTimeSlot({
+																	roomId,
+																	data: {
+																		startTime: timeslotData.startTime,
+																		endTime: timeslotData.endTime,
+																		price: timeslotData.price,
+																		roomId: room.id,
+																		status: 'AVAILABLE',
+																		isOvernight: timeslotData.isOvernight
+																	}
+																});
+															} else if (timeslotData.id) {
+																// Existing timeslot - update via API
+																updateTimeSlot({
+																	timeslotId: timeslotData.id,
+																	roomId: room.id,
+																	data: {
+																		startTime: timeslotData.startTime,
+																		endTime: timeslotData.endTime,
+																		price: timeslotData.price,
+																		roomId: room.id,
+																		status: 'AVAILABLE',
+																		isOvernight: timeslotData.isOvernight
+																	}
+																});
+															}
+														}}
+													>
+														<FuseSvgIcon>lucide:save</FuseSvgIcon>
+													</IconButton>
+													<IconButton
+														size="small"
+														color="error"
+														onClick={() => {
+															// Only call API if ID exists and is not a local temp ID
+															if (field.id && !field.id.startsWith('timeSlot-')) {
+																// Existing timeslot from server - delete via API
+																deleteTimeSlot({ timeslotId: field.id, roomId });
+															}
+
+															// Always remove from form array
+															removeTimeSlot(index);
+														}}
+													>
+														<FuseSvgIcon>lucide:trash-2</FuseSvgIcon>
+													</IconButton>
+												</div>
+											</div>
 										</Paper>
 									))}
 								</div>

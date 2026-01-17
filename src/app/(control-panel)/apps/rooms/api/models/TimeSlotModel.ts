@@ -9,7 +9,6 @@ const TimeSlotModel = (data: PartialDeep<TimeSlot>) =>
 		closeTime: "09:00",
 		price: 0,
 		isOvernight: false,
-		status: 'AVAILABLE',
 		createdAt: new Date().toISOString(),
 		updatedAt: new Date().toISOString()
 	});
