@@ -116,7 +116,12 @@ function RoomView(props: RoomViewProps) {
 		formState: { errors }
 	} = methods;
 
-	const { reset: resetTimeSlots, control: controlTimeSlots, getValues: getTimeSlotValues } = timeSlotMethods;
+	const {
+		reset: resetTimeSlots,
+		control: controlTimeSlots,
+		getValues: getTimeSlotValues,
+		setValue: setTimeSlotValue
+	} = timeSlotMethods;
 
 	const {
 		fields: timeSlotFields,
@@ -547,6 +552,7 @@ function RoomView(props: RoomViewProps) {
 								roomId={room?.id || roomId}
 								onSaveTimeSlot={handleSaveTimeSlot}
 								onDeleteTimeSlot={handleDeleteTimeSlot}
+								setValue={setTimeSlotValue}
 							/>
 						</div>
 					</Paper>

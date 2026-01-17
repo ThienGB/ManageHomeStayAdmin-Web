@@ -1,11 +1,6 @@
 'use client';
 
-import {
-	Checkbox,
-	FormControlLabel,
-	InputAdornment,
-	TextField
-} from '@mui/material';
+import { Checkbox, FormControlLabel, InputAdornment, TextField } from '@mui/material';
 import Grid from '@mui/material/Grid';
 import { Control, Controller, FieldErrors } from 'react-hook-form';
 
@@ -19,6 +14,7 @@ function RoomBasicInfoForm(props: RoomBasicInfoFormProps) {
 
 	const formatNumber = (value: number | string | undefined): string => {
 		if (!value) return '';
+
 		return String(value).replace(/\B(?=(\d{3})+(?!\d))/g, '.');
 	};
 
@@ -66,7 +62,9 @@ function RoomBasicInfoForm(props: RoomBasicInfoFormProps) {
 					)}
 				/>
 			</Grid>
-			<Grid size={{ sm: 12, md: 12 }}>
+			<Grid size={{ xs: 12, md: 4 }}>
+				{' '}
+				{/* Sửa ở đây: md: 4 */}
 				<Controller
 					name="capacity"
 					control={control}
@@ -84,7 +82,10 @@ function RoomBasicInfoForm(props: RoomBasicInfoFormProps) {
 					)}
 				/>
 			</Grid>
-			<Grid size={{ sm: 12, md: 12 }}>
+
+			<Grid size={{ xs: 12, md: 4 }}>
+				{' '}
+				{/* Sửa ở đây: md: 4 */}
 				<Controller
 					name="numberOfBeds"
 					control={control}
@@ -102,7 +103,10 @@ function RoomBasicInfoForm(props: RoomBasicInfoFormProps) {
 					)}
 				/>
 			</Grid>
-			<Grid size={{ sm: 12, md: 12 }}>
+
+			<Grid size={{ xs: 12, md: 4 }}>
+				{' '}
+				{/* Sửa ở đây: md: 4 */}
 				<Controller
 					name="area"
 					control={control}
