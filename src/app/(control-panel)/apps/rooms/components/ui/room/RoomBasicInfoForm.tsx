@@ -123,48 +123,6 @@ function RoomBasicInfoForm(props: RoomBasicInfoFormProps) {
 					)}
 				/>
 			</Grid>
-			<Grid size={{ sm: 12, md: 6 }}>
-				<Controller
-					name="hourlyRate"
-					control={control}
-					render={({ field }) => (
-						<TextField
-							{...field}
-							label="Hourly Rate"
-							fullWidth
-							required
-							value={formatNumber(field.value)}
-							onChange={(e) => field.onChange(parseNumber(e.target.value))}
-							InputProps={{
-								endAdornment: <InputAdornment position="end">VND</InputAdornment>
-							}}
-							error={!!errors.hourlyRate}
-							helperText={errors.hourlyRate?.message as string}
-						/>
-					)}
-				/>
-			</Grid>
-			<Grid size={{ sm: 12, md: 6 }}>
-				<Controller
-					name="overnightRate"
-					control={control}
-					render={({ field }) => (
-						<TextField
-							{...field}
-							label="Overnight Rate"
-							fullWidth
-							required
-							value={formatNumber(field.value)}
-							onChange={(e) => field.onChange(parseNumber(e.target.value))}
-							InputProps={{
-								endAdornment: <InputAdornment position="end">VND</InputAdornment>
-							}}
-							error={!!errors.overnightRate}
-							helperText={errors.overnightRate?.message as string}
-						/>
-					)}
-				/>
-			</Grid>
 			<Grid size={{ sm: 12, md: 12 }}>
 				<Controller
 					name="isActive"

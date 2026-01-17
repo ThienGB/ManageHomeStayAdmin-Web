@@ -25,6 +25,8 @@ import { useTimeSlots } from '../../api/hooks/useTimeSlots';
 import { useUpdateRoom } from '../../api/hooks/useUpdateRoom';
 import { useUpdateTimeSlot } from '../../api/hooks/useUpdateTimeSlot';
 import RoomModel from '../../api/models/RoomModel';
+import { RoomImage } from '../../api/types';
+import useRoomImages, { FormImage } from '../../hooks/useRoomImages';
 
 // Import refactored components
 import {
@@ -32,6 +34,7 @@ import {
 	RoomAmenitiesForm,
 	RoomBasicInfoForm,
 	RoomImageGallery,
+	RoomImagesForm,
 	RoomInfo,
 	RoomTimeSlots,
 	RoomTimeSlotsForm
@@ -41,8 +44,6 @@ const schema = z
 	.object({
 		name: z.string().min(3, 'Name must be at least 3 characters'),
 		description: z.string().min(10, 'Description must be at least 10 characters'),
-		hourlyRate: z.number().min(0, 'Hourly rate must be positive'),
-		overnightRate: z.number().min(0, 'Overnight rate must be positive'),
 		isActive: z.boolean(),
 		capacity: z.number().min(1, 'Capacity must be at least 1'),
 		numberOfBeds: z.number().min(0, 'Bed count must be positive'),
@@ -89,6 +90,9 @@ function RoomView(props: RoomViewProps) {
 	const { mutate: createTimeSlot } = useCreateTimeSlot();
 	const { mutate: updateTimeSlot } = useUpdateTimeSlot();
 	const { mutate: deleteTimeSlot } = useDeleteTimeSlot();
+
+	// Image management hook
+	const { syncImages, rollbackUploadedImages, isSyncing, syncStatus } = useRoomImages(roomId);
 
 	const navigate = useNavigate();
 
@@ -172,45 +176,117 @@ function RoomView(props: RoomViewProps) {
 	}, [room, timeSlots, reset, resetTimeSlots]);
 
 	const statusColor = room?.isActive ? 'success' : 'error';
+	const [isSaving, setIsSaving] = useState(false);
 
-	const handleSave = (data: any) => {
+	const handleSave = async (data: any) => {
 		if (isCreateMode) {
-			const roomData = {
-				name: data.name,
-				description: data.description,
-				capacity: data.capacity,
-				numberOfBeds: data.numberOfBeds,
-				area: data.area,
-				images: (data.images || []).map((img: any) => ({
-					url: typeof img === 'string' ? img : img.url
-				})),
-				isActive: data.isActive,
-				amenityIds: data.amenityIds || [],
-				hourlyRate: data.hourlyRate,
-				overnightRate: data.overnightRate
-			};
-			createRoom(roomData);
-		} else {
-			const roomData = {
-				id: roomId,
-				name: data.name,
-				description: data.description,
-				capacity: data.capacity,
-				numberOfBeds: data.numberOfBeds,
-				amenityIds: data.amenityIds || [],
-				area: data.area,
-				images: (data.images || []).map((img: any) => ({
-					id: img.id,
-					url: img.url
-				})),
-				isActive: data.isActive,
-				hourlyRate: data.hourlyRate,
-				overnightRate: data.overnightRate
-			};
-			updateRoom({ roomId, data: roomData });
-		}
+			setIsSaving(true);
+			// Track newly uploaded image URLs for potential rollback
+			const newlyUploadedUrls: string[] = [];
 
-		setIsEditMode(false);
+			try {
+				// Upload pending images first using Promise.allSettled for granular handling
+				const images: FormImage[] = data.images || [];
+				const localImages = images.filter((img) => img.isLocal && img.file);
+				const existingImages = images.filter((img) => !img.isLocal && img.url);
+
+				const uploadedImages: { url: string }[] = existingImages.map((img) => ({ url: img.url }));
+
+				// Upload local images in parallel
+				if (localImages.length > 0) {
+					const { uploadsApi } = await import('@/services/uploadsApiService');
+					const uploadResults = await Promise.allSettled(
+						localImages.map((img) => uploadsApi.uploadFile(img.file!, 'ROOMS'))
+					);
+
+					uploadResults.forEach((result) => {
+						if (result.status === 'fulfilled') {
+							uploadedImages.push({ url: result.value.url });
+							newlyUploadedUrls.push(result.value.url);
+						}
+					});
+
+					// Check for upload failures
+					const failedUploads = uploadResults.filter((r) => r.status === 'rejected');
+
+					if (failedUploads.length > 0) {
+						console.error(`${failedUploads.length} image(s) failed to upload`);
+					}
+				}
+
+				const roomData = {
+					name: data.name,
+					description: data.description,
+					capacity: data.capacity,
+					numberOfBeds: data.numberOfBeds,
+					area: data.area,
+					images: uploadedImages,
+					isActive: data.isActive,
+					amenityIds: data.amenityIds || []
+				};
+
+				createRoom(roomData, {
+					onSuccess: (responseData) => {
+						setIsSaving(false);
+						setIsEditMode(false);
+						navigate(`/apps/rooms/${responseData.id}`);
+					},
+					onError: async () => {
+						setIsSaving(false);
+						// Room creation failed - rollback uploaded images
+						await rollbackUploadedImages(newlyUploadedUrls);
+					}
+				});
+			} catch (error) {
+				console.error('Error uploading images:', error);
+				setIsSaving(false);
+				// Rollback any successfully uploaded images
+				await rollbackUploadedImages(newlyUploadedUrls);
+			}
+		} else {
+			// Edit mode - handle image changes after room update
+			setIsSaving(true);
+
+			try {
+				const roomData = {
+					id: roomId,
+					name: data.name,
+					description: data.description,
+					capacity: data.capacity,
+					numberOfBeds: data.numberOfBeds,
+					amenityIds: data.amenityIds || [],
+					area: data.area,
+					isActive: data.isActive,
+					hourlyRate: data.hourlyRate,
+					overnightRate: data.overnightRate
+				};
+
+				// First update the room basic info
+				updateRoom(
+					{ roomId, data: roomData },
+					{
+						onSuccess: async () => {
+							// After room update success, sync image changes
+							const currentImages: FormImage[] = data.images || [];
+							const originalImages: RoomImage[] = room?.images || [];
+
+							// Use the hook for granular image sync with Promise.allSettled
+							await syncImages(currentImages, originalImages);
+
+							setIsSaving(false);
+							setIsEditMode(false);
+							navigate(`/apps/rooms/${roomId}`);
+						},
+						onError: () => {
+							setIsSaving(false);
+						}
+					}
+				);
+			} catch (error) {
+				console.error('Error updating room:', error);
+				setIsSaving(false);
+			}
+		}
 	};
 
 	const handleSaveTimeSlot = (index: number, timeslotData: any) => {
@@ -301,6 +377,8 @@ function RoomView(props: RoomViewProps) {
 										if (isCreateMode) {
 											navigate('/apps/rooms');
 										} else {
+											reset();
+											navigate(`/apps/rooms/${roomId}`);
 											setIsEditMode(false);
 										}
 									}}
@@ -311,9 +389,14 @@ function RoomView(props: RoomViewProps) {
 									variant="contained"
 									color="primary"
 									onClick={methods.handleSubmit(handleSave)}
-									startIcon={<FuseSvgIcon>lucide:save</FuseSvgIcon>}
+									startIcon={
+										<FuseSvgIcon>
+											{isSaving || isSyncing ? 'lucide:loader-2' : 'lucide:save'}
+										</FuseSvgIcon>
+									}
+									disabled={isSaving || isSyncing}
 								>
-									Save Changes
+									{isSyncing && syncStatus ? syncStatus : isSaving ? 'Saving...' : 'Save Changes'}
 								</Button>
 							</>
 						) : (
@@ -421,6 +504,19 @@ function RoomView(props: RoomViewProps) {
 									control={control}
 									errors={errors}
 								/>
+							</div>
+
+							<Divider />
+
+							{/* Images */}
+							<div>
+								<Typography
+									variant="h6"
+									className="mb-4 font-semibold"
+								>
+									Images
+								</Typography>
+								<RoomImagesForm control={control} />
 							</div>
 
 							<Divider />
