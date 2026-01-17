@@ -1,7 +1,7 @@
 import FuseLoading from '@fuse/core/FuseLoading';
 import FuseSvgIcon from '@fuse/core/FuseSvgIcon';
 import Link from '@fuse/core/Link';
-import { Chip, ListItemIcon, MenuItem, Paper, Rating } from '@mui/material';
+import { Chip, ListItemIcon, MenuItem, Paper } from '@mui/material';
 import Typography from '@mui/material/Typography';
 import { type MRT_ColumnDef } from 'material-react-table';
 import { useMemo } from 'react';
@@ -10,36 +10,57 @@ import { useRooms } from '../../api/hooks/useRooms';
 import { Room } from '../../api/types';
 import { useRoomsAppContext } from '../../context/rooms-context/useRoomsAppContext';
 
-function RoomsTable() {
+type RoomsTableProps = {
+	searchTerm?: string;
+};
+
+function RoomsTable({ searchTerm = '' }: RoomsTableProps) {
 	const { pagination, setPagination, filters } = useRoomsAppContext();
 	
 	const { data, isLoading } = useRooms({
 		...pagination,
 		...filters
 	});
-	const rooms = data?.data?.content || [];
+	const allRooms = data?.data?.content || [];
+
+	// Filter rooms locally based on search term
+	const rooms = useMemo(() => {
+		if (!searchTerm) return allRooms;
+		
+		const lowerSearch = searchTerm.toLowerCase();
+		return allRooms.filter((room) =>
+			room.name?.toLowerCase().includes(lowerSearch) ||
+			room.description?.toLowerCase().includes(lowerSearch)
+		);
+	}, [allRooms, searchTerm]);
 
 	const columns = useMemo<MRT_ColumnDef<Room>[]>(
 		() => [
 			{
 				accessorFn: (row) => row.images?.[0],
 				id: 'image',
-				header: '',
+				header: 'Image',
 				enableColumnFilter: false,
 				enableColumnDragging: false,
 				size: 64,
 				enableSorting: false,
+				muiTableHeadCellProps: {
+					align: 'left',
+					sx: {
+						verticalAlign: 'middle'
+					}
+				},
 				Cell: ({ row }) => (
-					<div className="flex items-center justify-center">
+					<div className="flex items-center justify-start">
 						{row.original?.images?.length > 0 ? (
 							<img
-								className="block max-h-9 w-full max-w-9 rounded-sm"
+								className="block max-h-20 w-full max-w-20 rounded-sm"
 								src={row.original.images[0].url}
 								alt={row.original.name}
 							/>
 						) : (
 							<img
-								className="block max-h-9 w-full max-w-9 rounded-sm"
+								className="block max-h-16 w-full max-w-16 rounded-sm"
 								src="/assets/images/placeholder.jpg"
 								alt={row.original.name}
 							/>
@@ -112,11 +133,21 @@ function RoomsTable() {
 						pageSize: pagination?.limit ?? 10
 					}
 				}}
+				enableRowSelection={false}
+				enableColumnActions={false}
+				enableTopToolbar={false}
+				displayColumnDefOptions={{
+					'mrt-row-actions': {
+						size: 60,
+					},
+				}}
 				renderRowActionMenuItems={({ closeMenu, row }) => [
 					<MenuItem
 						key={0}
 						onClick={() => {
 							closeMenu();
+							// TODO: Implement delete functionality
+							console.log('Delete room:', row.original.id);
 						}}
 					>
 						<ListItemIcon>

@@ -28,9 +28,6 @@ function UserMenu(props: UserMenuProps) {
 	const { className, popoverProps, arrowIcon = 'lucide:chevron-up', dense = false, onlyAvatar = false } = props;
 	const { data: user, signOut, isGuest } = useUser();
 	const [userMenu, setUserMenu] = useState<HTMLElement | null>(null);
-	const userMenuClick = (event: React.MouseEvent<HTMLElement>) => {
-		setUserMenu(event.currentTarget);
-	};
 
 	const userMenuClose = () => {
 		setUserMenu(null);
@@ -48,7 +45,6 @@ function UserMenu(props: UserMenuProps) {
 					onlyAvatar ? 'min-w-0 p-0' : dense ? 'h-9 min-h-9 gap-1.5 px-1' : 'h-14 min-h-14 gap-3',
 					className
 				)}
-				onClick={userMenuClick}
 				color="inherit"
 			>
 				{user?.photoURL ? (

@@ -1,17 +1,15 @@
 'use client';
+import ImageDialog from '@/dialogs/image-dialog/ImageDialog';
+import useFuseLayoutSettings from '@fuse/core/FuseLayout/useFuseLayoutSettings';
+import FuseSuspense from '@fuse/core/FuseSuspense';
 import { styled } from '@mui/material/styles';
 import { memo, ReactNode } from 'react';
 import { Outlet } from 'react-router';
 import { Layout1ConfigDefaultsType } from 'src/components/theme-layouts/layout1/Layout1Config';
-import Configurator from 'src/components/theme-layouts/components/configurator/Configurator';
-import useFuseLayoutSettings from '@fuse/core/FuseLayout/useFuseLayoutSettings';
-import FuseSuspense from '@fuse/core/FuseSuspense';
 import FooterLayout1 from './components/FooterLayout1';
 import LeftSideLayout1 from './components/LeftSideLayout1';
 import NavbarWrapperLayout1 from './components/NavbarWrapperLayout1';
-import RightSideLayout1 from './components/RightSideLayout1';
 import ToolbarLayout1 from './components/ToolbarLayout1';
-import ImageDialog from '@/dialogs/image-dialog/ImageDialog';
 
 const Root = styled('div')(({ config }: { config: Layout1ConfigDefaultsType }) => ({
 	...(config.mode === 'boxed' && {
@@ -69,9 +67,7 @@ function Layout1(props: Layout1Props) {
 						<ToolbarLayout1 className={config.toolbar.style === 'fixed' ? 'sticky top-0' : ''} />
 					)}
 
-					<div className="sticky top-0 z-99">
-						<Configurator />
-					</div>
+
 
 					<div className="relative z-10 flex min-h-0 flex-auto flex-col">
 						<FuseSuspense>
@@ -91,8 +87,6 @@ function Layout1(props: Layout1Props) {
 
 				{config.navbar.display && config.navbar.position === 'right' && <NavbarWrapperLayout1 />}
 			</div>
-
-			{config.rightSidePanel.display && <RightSideLayout1 />}
 		</Root>
 	);
 }

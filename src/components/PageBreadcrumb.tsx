@@ -1,12 +1,12 @@
 'use client';
 
-import Breadcrumbs, { BreadcrumbsProps } from '@mui/material/Breadcrumbs';
 import { FuseNavItemType } from '@fuse/core/FuseNavigation/types/FuseNavItemType';
 import usePathname from '@fuse/hooks/usePathname';
+import Breadcrumbs, { BreadcrumbsProps } from '@mui/material/Breadcrumbs';
 
+import Link from '@fuse/core/Link';
 import Typography from '@mui/material/Typography';
 import clsx from 'clsx';
-import Link from '@fuse/core/Link';
 import useNavigationItems from './theme-layouts/components/navigation/hooks/useNavigationItems';
 
 type PageBreadcrumbProps = BreadcrumbsProps & {
@@ -52,9 +52,12 @@ function PageBreadcrumb(props: PageBreadcrumbProps) {
 			(acc: { title: string; url: string }[], part, index, array) => {
 				const url = `/${array.slice(0, index + 1).join('/')}`;
 				const navItem = getNavigationItem(url, navigation);
-				const title = navItem?.title || part;
-
-				acc.push({ title, url });
+				
+				// Only add to breadcrumbs if it exists in navigation
+				if (navItem) {
+					acc.push({ title: navItem.title, url });
+				}
+				
 				return acc;
 			},
 			skipHome ? [] : [{ title: 'Home', url: '/' }]

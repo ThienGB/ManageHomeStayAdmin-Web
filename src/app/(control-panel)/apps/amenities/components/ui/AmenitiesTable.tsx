@@ -2,7 +2,6 @@ import FuseSvgIcon from '@fuse/core/FuseSvgIcon';
 import Link from '@fuse/core/Link';
 import { ListItemIcon, MenuItem, Paper } from '@mui/material';
 import Typography from '@mui/material/Typography';
-import { format } from 'date-fns';
 import { type MRT_ColumnDef } from 'material-react-table';
 import { useMemo } from 'react';
 import DataTable from 'src/components/data-table/DataTable';
@@ -10,10 +9,25 @@ import { useAmenities } from '../../api/hooks/useAmenities';
 import { useDeleteAmenity } from '../../api/hooks/useDeleteAmenity';
 import { Amenity } from '../../api/types';
 
-function AmenitiesTable() {
+type AmenitiesTableProps = {
+	searchTerm?: string;
+};
+
+function AmenitiesTable({ searchTerm = '' }: AmenitiesTableProps) {
 	const { data, isLoading } = useAmenities();
-	const amenities = data || [];
+	const allAmenities = data || [];
 	const { mutate: deleteAmenity } = useDeleteAmenity();
+
+	// Filter amenities locally based on search term
+	const amenities = useMemo(() => {
+		if (!searchTerm) return allAmenities;
+		
+		const lowerSearch = searchTerm.toLowerCase();
+		return allAmenities.filter((amenity) =>
+			amenity.name?.toLowerCase().includes(lowerSearch) ||
+			amenity.description?.toLowerCase().includes(lowerSearch)
+		);
+	}, [allAmenities, searchTerm]);
 
 	const columns = useMemo<MRT_ColumnDef<Amenity>[]>(
 		() => [
@@ -65,6 +79,14 @@ function AmenitiesTable() {
 				columns={columns}
 				manualPagination
 				rowCount={amenities.length}
+				enableRowSelection={false}
+				enableColumnActions={false}
+				enableTopToolbar={false}
+				displayColumnDefOptions={{
+					'mrt-row-actions': {
+						size: 60,
+					},
+				}}
 				renderRowActionMenuItems={({ closeMenu, row, table }) => [
 					<MenuItem
 						key={0}

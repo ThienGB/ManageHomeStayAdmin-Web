@@ -58,8 +58,6 @@ function NavbarStyle1Content(props: NavbarStyle1ContentProps) {
 			</StyledContent>
 
 			<div className="flex flex-col gap-3 p-3">
-				<GoToDocBox className="mx-1" />
-
 				<UserMenu className="w-full" />
 			</div>
 		</Root>
