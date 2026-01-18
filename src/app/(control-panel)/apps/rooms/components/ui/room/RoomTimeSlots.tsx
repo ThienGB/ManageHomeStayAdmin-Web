@@ -59,7 +59,11 @@ function RoomTimeSlots(props: RoomTimeSlotsProps) {
 	const handleConfirmBooking = () => {
 		if (!bookingDialog.slot || !roomId || !selectedDate) return;
 
-		const dateString = selectedDate.toISOString().split('T')[0];
+		// Format date as YYYY-MM-DD in local timezone
+		const year = selectedDate.getFullYear();
+		const month = String(selectedDate.getMonth() + 1).padStart(2, '0');
+		const day = String(selectedDate.getDate()).padStart(2, '0');
+		const dateString = `${year}-${month}-${day}`;
 
 		createBooking(
 			{
@@ -136,31 +140,46 @@ function RoomTimeSlots(props: RoomTimeSlotsProps) {
 							size={{ sm: 12, md: 6 }}
 						>
 							<Paper
-								className="p-4"
+								className="p-4 h-full"
 								elevation={0}
 								sx={{
 									bgcolor: isAvailable ? 'background.paper' : 'grey.50',
-									opacity: isAvailable ? 1 : 0.6,
+									opacity: isAvailable ? 1 : 0.7,
 									borderWidth: 2,
 									borderStyle: 'solid',
-									borderColor: isAvailable ? 'success.light' : 'grey.300',
-									transition: 'all 0.2s ease-in-out'
+									borderColor: isAvailable ? 'success.light' : 'error.main',
+									transition: 'all 0.2s ease-in-out',
+									position: 'relative',
+									overflow: 'hidden',
+									'&::before': !isAvailable ? {
+										content: '""',
+										position: 'absolute',
+										top: 0,
+										left: 0,
+										right: 0,
+										height: '4px',
+										bgcolor: 'error.main',
+									} : {}
 								}}
 							>
-								<div className="mb-3 flex items-center justify-between flex-wrap gap-2">
+								{/* Header with Title */}
+								<Box className="mb-3">
 									<Typography
 										variant="h6"
-										className="font-semibold"
+										className="font-semibold mb-2"
 									>
 										Khung giờ {idx + 1}
 									</Typography>
-									<Box className="flex gap-1 flex-wrap">
+									
+									{/* Status Chips Row */}
+									<Box className="flex gap-1 items-center">
 										{slot.isOvernight && (
 											<Chip
 												label="Qua đêm"
 												size="small"
 												color="primary"
 												icon={<FuseSvgIcon size={14}>lucide:moon</FuseSvgIcon>}
+												sx={{ fontWeight: 500 }}
 											/>
 										)}
 										{roomId && !isAvailable && (
@@ -170,6 +189,7 @@ function RoomTimeSlots(props: RoomTimeSlotsProps) {
 												color="error"
 												icon={<FuseSvgIcon size={14}>lucide:calendar-x</FuseSvgIcon>}
 												variant="filled"
+												sx={{ fontWeight: 500 }}
 											/>
 										)}
 										{roomId && isAvailable && (
@@ -179,53 +199,85 @@ function RoomTimeSlots(props: RoomTimeSlotsProps) {
 												color="success"
 												icon={<FuseSvgIcon size={14}>lucide:calendar-check</FuseSvgIcon>}
 												variant="outlined"
+												sx={{ fontWeight: 500 }}
 											/>
 										)}
 									</Box>
-								</div>
-								<div className="space-y-2">
-									<div className="flex items-center gap-2">
+								</Box>
+								{/* Time Slot Information */}
+								<Box className="space-y-2">
+									<Box className="flex items-center gap-2">
 										<FuseSvgIcon
-											size={16}
+											size={18}
 											className="text-gray-500"
 										>
 											lucide:clock
 										</FuseSvgIcon>
-										<Typography variant="body2">
+										<Typography variant="body2" className="font-medium">
 											{slot.startTime} - {slot.endTime}
 										</Typography>
-									</div>
-									<div className="flex items-center gap-2">
+									</Box>
+									<Box className="flex items-center gap-2">
 										<FuseSvgIcon
-											size={16}
+											size={18}
 											className="text-gray-500"
 										>
 											lucide:dollar-sign
 										</FuseSvgIcon>
 										<Typography
-											variant="body2"
+											variant="body1"
 											className="font-semibold"
+											color="primary"
 										>
 											{slot.price?.toLocaleString() || 0} VND
 										</Typography>
-									</div>
+									</Box>
 
 									{/* Book Button for available slots */}
 									{roomId && isAvailable && selectedDate && (
-										<div className="mt-3">
+										<Box className="pt-2">
 											<Button
 												variant="contained"
 												color="primary"
-												size="small"
+												size="medium"
 												fullWidth
 												onClick={() => handleBookSlot(slot)}
 												startIcon={<FuseSvgIcon size={16}>lucide:calendar-plus</FuseSvgIcon>}
+												sx={{
+													py: 1,
+													fontWeight: 600,
+													textTransform: 'none'
+												}}
 											>
 												Đặt khung giờ
 											</Button>
-										</div>
+										</Box>
 									)}
-								</div>
+
+									{/* Message for unavailable slots */}
+									{roomId && !isAvailable && (
+										<Box className="pt-2">
+											<Paper
+												sx={{
+													p: 1.5,
+													bgcolor: 'error.50',
+													border: '1px solid',
+													borderColor: 'error.200'
+												}}
+												elevation={0}
+											>
+												<Typography
+													variant="caption"
+													color="error.dark"
+													className="flex items-center gap-1"
+												>
+													<FuseSvgIcon size={14}>lucide:info</FuseSvgIcon>
+													Khung giờ này đã được đặt
+												</Typography>
+											</Paper>
+										</Box>
+									)}
+								</Box>
 							</Paper>
 						</Grid>
 					);

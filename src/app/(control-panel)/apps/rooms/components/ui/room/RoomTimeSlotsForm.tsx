@@ -243,25 +243,6 @@ function TimeSlotRow({
 							icon={<FuseSvgIcon size={14}>{statusInfo[status].icon}</FuseSvgIcon>}
 							variant={status === 'saved' ? 'outlined' : 'filled'}
 						/>
-						{/* Availability badge */}
-						{!isAvailable && (
-							<Chip
-								size="small"
-								label="Đã đặt"
-								color="error"
-								icon={<FuseSvgIcon size={14}>lucide:calendar-x</FuseSvgIcon>}
-								variant="filled"
-							/>
-						)}
-						{isAvailable && status === 'saved' && (
-							<Chip
-								size="small"
-								label="Có sẵn"
-								color="success"
-								icon={<FuseSvgIcon size={14}>lucide:calendar-check</FuseSvgIcon>}
-								variant="outlined"
-							/>
-						)}
 					</Box>
 
 					{/* Actions */}
