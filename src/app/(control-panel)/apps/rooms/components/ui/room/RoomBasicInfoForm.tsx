@@ -35,7 +35,7 @@ function RoomBasicInfoForm(props: RoomBasicInfoFormProps) {
 					render={({ field }) => (
 						<TextField
 							{...field}
-							label="Room Name"
+							label="Tên phòng"
 							fullWidth
 							required
 							error={!!errors.name}
@@ -51,7 +51,7 @@ function RoomBasicInfoForm(props: RoomBasicInfoFormProps) {
 					render={({ field }) => (
 						<TextField
 							{...field}
-							label="Description"
+							label="Mô tả"
 							fullWidth
 							multiline
 							rows={4}
@@ -71,7 +71,7 @@ function RoomBasicInfoForm(props: RoomBasicInfoFormProps) {
 					render={({ field }) => (
 						<TextField
 							{...field}
-							label="Room Capacity"
+							label="Sức chứa"
 							fullWidth
 							required
 							value={formatNumber(field.value)}
@@ -92,7 +92,7 @@ function RoomBasicInfoForm(props: RoomBasicInfoFormProps) {
 					render={({ field }) => (
 						<TextField
 							{...field}
-							label="Number of Beds"
+							label="Số giường"
 							fullWidth
 							required
 							value={formatNumber(field.value)}
@@ -113,7 +113,7 @@ function RoomBasicInfoForm(props: RoomBasicInfoFormProps) {
 					render={({ field }) => (
 						<TextField
 							{...field}
-							label="Area"
+							label="Diện tích"
 							fullWidth
 							required
 							value={formatNumber(field.value)}
@@ -139,7 +139,7 @@ function RoomBasicInfoForm(props: RoomBasicInfoFormProps) {
 									onChange={(e) => field.onChange(e.target.checked)}
 								/>
 							}
-							label="Active"
+							label="Hoạt động"
 						/>
 					)}
 				/>

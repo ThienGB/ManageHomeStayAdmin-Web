@@ -14,7 +14,7 @@
 
 html {
 	font-family:
-		'Geist',
+		'Be Vietnam Pro',
 		Roboto,
 		Helvetica Neue,
 		Arial,
@@ -54,8 +54,8 @@ body {
 	height: 100%;
 }
 
-.ps > .ps__rail-y,
-.ps > .ps__rail-x {
+.ps>.ps__rail-y,
+.ps>.ps__rail-x {
 	z-index: 99;
 }
 
@@ -64,7 +64,7 @@ body {
 	left: 2px !important;
 }
 
-[dir='rtl'] .ps > .ps__rail-y {
+[dir='rtl'] .ps>.ps__rail-y {
 	left: 0 !important;
 	right: auto !important;
 }

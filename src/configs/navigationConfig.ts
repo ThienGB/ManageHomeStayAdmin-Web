@@ -14,22 +14,22 @@ i18n.addResourceBundle('ar', 'navigation', ar);
 const navigationConfig: FuseNavItemType[] = [
 	{
 		id: 'rooms',
-		title: 'Rooms',
-		subtitle: 'Manage your rooms',
+		title: 'Phòng',
+		subtitle: 'Quản lý phòng của bạn',
 		type: 'group',
 		icon: 'lucide:layout-dashboard',
 		translate: 'ROOMS',
 		children: [
 			{
 				id: 'rooms.list',
-				title: 'Rooms',
+				title: 'Phòng',
 				type: 'item',
 				icon: 'heroicons-outline:home-modern',
 				url: '/apps/rooms'
 			},
 			{
 				id: 'rooms.random-generator',
-				title: 'Random Generator',
+				title: 'Tạo mật khẩu',
 				type: 'item',
 				icon: 'lucide:shuffle',
 				url: '/apps/random-generator'
@@ -38,38 +38,38 @@ const navigationConfig: FuseNavItemType[] = [
 	},
 	{
 		id: 'amenities',
-		title: 'Amenities',
-		subtitle: 'Manage your amenities',
+		title: 'Tiện nghi',
+		subtitle: 'Quản lý tiện nghi của bạn',
 		type: 'group',
 		icon: 'lucide:package',
 		translate: 'AMENITIES',
 		children: [
 			{
 				id: 'amenities.list',
-				title: 'Amenities',
+				title: 'Tiện nghi',
 				type: 'item',
 				icon: 'lucide:package',
 				url: '/apps/amenities/list'
 			}
 		]
 	},
-	{
-		id: 'bookings',
-		title: 'Bookings',
-		subtitle: 'Manage your bookings',
-		type: 'group',
-		icon: 'lucide:calendar',
-		translate: 'BOOKINGS',
-		children: [
-			{
-				id: 'bookings.list',
-				title: 'Bookings',
-				type: 'item',
-				icon: 'lucide:calendar-days',
-				url: '/apps/bookings'
-			}
-		]
-	}
+	// {
+	// 	id: 'bookings',
+	// 	title: 'Bookings',
+	// 	subtitle: 'Manage your bookings',
+	// 	type: 'group',
+	// 	icon: 'lucide:calendar',
+	// 	translate: 'BOOKINGS',
+	// 	children: [
+	// 		{
+	// 			id: 'bookings.list',
+	// 			title: 'Bookings',
+	// 			type: 'item',
+	// 			icon: 'lucide:calendar-days',
+	// 			url: '/apps/bookings'
+	// 		}
+	// 	]
+	// }
 ];
 
 export default navigationConfig;

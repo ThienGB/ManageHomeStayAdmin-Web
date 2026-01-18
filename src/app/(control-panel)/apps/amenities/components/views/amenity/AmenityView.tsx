@@ -2,27 +2,26 @@
 
 import FuseLoading from '@fuse/core/FuseLoading';
 import FusePageCarded from '@fuse/core/FusePageCarded';
-import Button from '@mui/material/Button';
-import Typography from '@mui/material/Typography';
-import { motion } from 'motion/react';
-import { useEffect, useState, useMemo } from 'react';
-import useParams from '@fuse/hooks/useParams';
 import Link from '@fuse/core/Link';
-import _ from 'lodash';
-import { FormProvider, useForm } from 'react-hook-form';
+import useParams from '@fuse/hooks/useParams';
 import useThemeMediaQuery from '@fuse/hooks/useThemeMediaQuery';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { FormControl, FormLabel, TextField } from '@mui/material';
+import Button from '@mui/material/Button';
+import Typography from '@mui/material/Typography';
+import _ from 'lodash';
+import { motion } from 'motion/react';
+import { useEffect, useMemo, useState } from 'react';
+import { Controller, FormProvider, useForm } from 'react-hook-form';
 import { z } from 'zod';
-import AmenityHeader from '../../ui/AmenityHeader';
 import { useAmenity } from '../../../api/hooks/useAmenity';
 import AmenityModel from '../../../api/models/AmenityModel';
-import { TextField, Autocomplete, FormControl, FormLabel } from '@mui/material';
-import { Controller } from 'react-hook-form';
+import AmenityHeader from '../../ui/AmenityHeader';
 import IconSearchField from '../../ui/IconSearchField';
 
 const schema = z.object({
-	name: z.string().nonempty('You must enter an amenity name').min(2, 'The amenity name must be at least 2 characters'),
-	categoryId: z.string().nonempty('You must select a category'),
+	name: z.string().nonempty('Bạn phải nhập tên tiện nghi').min(2, 'Tên tiện nghi phải có ít nhất 2 ký tự'),
+	categoryId: z.string().nonempty('Bạn phải chọn danh mục'),
 	description: z.string().optional(),
 	icon: z.string().optional()
 });
@@ -89,7 +88,7 @@ function AmenityView() {
 					color="text.secondary"
 					variant="h5"
 				>
-					There is no such amenity!
+					Không tìm thấy tiện nghi!
 				</Typography>
 				<Button
 					className="mt-6"
@@ -98,7 +97,7 @@ function AmenityView() {
 					to="/apps/amenities"
 					color="inherit"
 				>
-					Go to Amenities Page
+					Đi đến trang tiện nghi
 				</Button>
 			</motion.div>
 		);
@@ -120,7 +119,7 @@ function AmenityView() {
 								control={control}
 								render={({ field }) => (
 									<FormControl className="w-full">
-										<FormLabel htmlFor="name">Name</FormLabel>
+										<FormLabel htmlFor="name">Tên</FormLabel>
 										<TextField
 											id="name"
 											{...field}
@@ -139,10 +138,10 @@ function AmenityView() {
 								control={control}
 								render={({ field: { onChange, value } }) => (
 									<IconSearchField
-										label="Icon"
+										label="Biểu tượng"
 										value={value}
 										onChange={onChange}
-										placeholder="Search icons (e.g., home, wifi, user)"
+										placeholder="Tìm kiếm biểu tượng (ví dụ: home, wifi, user)"
 										iconSet="heroicons"
 										error={!!errors.icon}
 										helperText={errors?.icon?.message as string}
@@ -155,7 +154,7 @@ function AmenityView() {
 								control={control}
 								render={({ field }) => (
 									<FormControl className="w-full">
-										<FormLabel htmlFor="description">Description</FormLabel>
+										<FormLabel htmlFor="description">Mô tả</FormLabel>
 										<TextField
 											{...field}
 											id="description"

@@ -39,7 +39,7 @@ function RoomsTable({ searchTerm = '' }: RoomsTableProps) {
 			{
 				accessorFn: (row) => row.images?.[0],
 				id: 'image',
-				header: 'Image',
+				header: 'Hình ảnh',
 				enableColumnFilter: false,
 				enableColumnDragging: false,
 				size: 64,
@@ -70,7 +70,7 @@ function RoomsTable({ searchTerm = '' }: RoomsTableProps) {
 			},
 			{
 				accessorKey: 'name',
-				header: 'Name',
+				header: 'Tên',
 				Cell: ({ row }) => (
 					<Typography
 						component={Link}
@@ -83,10 +83,10 @@ function RoomsTable({ searchTerm = '' }: RoomsTableProps) {
 			},
 			{
 				accessorKey: 'status',
-				header: 'Status',
+				header: 'Trạng thái',
 				Cell: ({ row }) => (
 					<Chip
-						label={row.original.isActive ? 'ACTIVE' : 'INACTIVE'}
+						label={row.original.isActive ? 'HOẠT ĐỘNG' : 'NGỮNG HOẠT ĐỘNG'}
 						size="small"
 						color={row.original.isActive ? 'success' : 'warning'}
 					/>
@@ -151,7 +151,7 @@ function RoomsTable({ searchTerm = '' }: RoomsTableProps) {
 						<ListItemIcon>
 							<FuseSvgIcon>lucide:trash</FuseSvgIcon>
 						</ListItemIcon>
-						Delete
+						Xóa
 					</MenuItem>
 				]}
 			/>

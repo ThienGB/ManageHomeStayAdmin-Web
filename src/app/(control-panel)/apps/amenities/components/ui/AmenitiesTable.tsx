@@ -33,7 +33,7 @@ function AmenitiesTable({ searchTerm = '' }: AmenitiesTableProps) {
 		() => [
 			{
 				accessorKey: 'name',
-				header: 'Name',
+				header: 'Tên',
 				Cell: ({ row }) => (
 					<Typography
 						component={Link}
@@ -46,7 +46,7 @@ function AmenitiesTable({ searchTerm = '' }: AmenitiesTableProps) {
 			},
 			{
 				accessorKey: 'icon',
-				header: 'Icon',
+				header: 'Biểu tượng',
 				Cell: ({ row }) => (
 					<div className="flex items-center gap-2">
 						{row.original.icon && <FuseSvgIcon size={20}>{row.original.icon}</FuseSvgIcon>}
@@ -55,7 +55,7 @@ function AmenitiesTable({ searchTerm = '' }: AmenitiesTableProps) {
 			},
 			{
 				accessorKey: 'description',
-				header: 'Description',
+				header: 'Mô tả',
 				Cell: ({ row }) => (
 					<Typography
 						variant="body2"
@@ -99,7 +99,7 @@ function AmenitiesTable({ searchTerm = '' }: AmenitiesTableProps) {
 						<ListItemIcon>
 							<FuseSvgIcon>lucide:trash</FuseSvgIcon>
 						</ListItemIcon>
-						Delete
+						Xóa
 					</MenuItem>
 				]}
 				// renderTopToolbarCustomActions={({ table }) => {

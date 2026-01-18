@@ -1,9 +1,9 @@
 import FuseSvgIcon from '@fuse/core/FuseSvgIcon';
 import NavLinkAdapter from '@fuse/core/NavLinkAdapter';
 import {
-    IconButton,
-    InputAdornment,
-    TextField
+	IconButton,
+	InputAdornment,
+	TextField
 } from '@mui/material';
 import Button from '@mui/material/Button';
 import Typography from '@mui/material/Typography';
@@ -34,8 +34,8 @@ function AmenitiesHeader({ onSearchChange }: AmenitiesHeaderProps) {
 						initial={{ x: -20 }}
 						animate={{ x: 0, transition: { delay: 0.2 } }}
 					>
-						<Typography className="text-4xl leading-none font-extrabold tracking-tight">
-							Amenities
+						<Typography className="text-4xl leading-none font-extrabold tracking-tight" sx={{ fontFamily: "'Be Vietnam Pro', Roboto, Arial, sans-serif" }}>
+							Tiện nghi
 						</Typography>
 					</motion.span>
 
@@ -47,7 +47,7 @@ function AmenitiesHeader({ onSearchChange }: AmenitiesHeaderProps) {
 							animate={{ opacity: 1, x: 0, transition: { delay: 0.2 } }}
 						>
 							<TextField
-								placeholder="Search amenities..."
+								placeholder="Tìm kiếm tiện nghi..."
 								value={searchInput}
 								onChange={(e) => handleSearchChange(e.target.value)}
 								size="medium"
@@ -92,7 +92,7 @@ function AmenitiesHeader({ onSearchChange }: AmenitiesHeaderProps) {
 								to="/apps/amenities/new"
 								startIcon={<FuseSvgIcon>lucide:plus</FuseSvgIcon>}
 							>
-								Add
+								Thêm
 							</Button>
 						</motion.div>
 					</div>

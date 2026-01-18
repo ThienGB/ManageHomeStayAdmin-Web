@@ -5,41 +5,41 @@ import { useState } from 'react';
 import PageBreadcrumb from 'src/components/PageBreadcrumb';
 
 function RandomNumberGeneratorView() {
-	const [randomNumber, setRandomNumber] = useState<string>('');
+	const [password, setPassword] = useState<string>('');
 	const [isGenerating, setIsGenerating] = useState(false);
-	const [doorType, setDoorType] = useState<'main' | 'cabinet' | null>(null);
+	const [passwordType, setPasswordType] = useState<'main' | 'cabinet' | null>(null);
 
 	const handleGenerateMainDoor = () => {
 		setIsGenerating(true);
-		setDoorType('main');
+		setPasswordType('main');
 		
 		// Animation effect
 		setTimeout(() => {
 			const min = 10000; // 5 digits minimum
 			const max = 99999; // 5 digits maximum
 			const random = Math.floor(Math.random() * (max - min + 1)) + min;
-			setRandomNumber(random.toString() + '!');
+			setPassword(random.toString() + '!');
 			setIsGenerating(false);
 		}, 300);
 	};
 
 	const handleGenerateCabinet = () => {
 		setIsGenerating(true);
-		setDoorType('cabinet');
+		setPasswordType('cabinet');
 		
 		// Animation effect
 		setTimeout(() => {
 			const min = 1000; // 4 digits minimum
 			const max = 9999; // 4 digits maximum
 			const random = Math.floor(Math.random() * (max - min + 1)) + min;
-			setRandomNumber(random.toString());
+			setPassword(random.toString());
 			setIsGenerating(false);
 		}, 300);
 	};
 
 	const handleCopy = () => {
-		if (randomNumber) {
-			navigator.clipboard.writeText(randomNumber);
+		if (password) {
+			navigator.clipboard.writeText(password);
 		}
 	};
 
@@ -56,7 +56,7 @@ function RandomNumberGeneratorView() {
 							className="flex items-center justify-center w-10 h-10 rounded-lg bg-gradient-to-br from-blue-500 to-purple-600"
 						>
 							<FuseSvgIcon className="text-white" size={20}>
-								lucide:shuffle
+								lucide:key
 							</FuseSvgIcon>
 						</motion.div>
 						<motion.div
@@ -64,13 +64,13 @@ function RandomNumberGeneratorView() {
 							animate={{ x: 0, opacity: 1, transition: { delay: 0.2 } }}
 						>
 							<Typography className="text-2xl sm:text-3xl leading-none font-bold tracking-tight">
-								Random Number Generator
+								Tạo Mật Khẩu
 							</Typography>
 							<Typography
 								variant="caption"
 								className="mt-1 text-gray-600 dark:text-gray-400"
 							>
-								Generate random numbers with custom type
+								Tạo mật khẩu với loại tùy chọn
 							</Typography>
 						</motion.div>
 					</div>
@@ -101,7 +101,7 @@ function RandomNumberGeneratorView() {
 										<FuseSvgIcon size={18} color="primary">
 											lucide:sparkles
 										</FuseSvgIcon>
-										Select Door Type
+										Chọn Loại Cửa
 									</Typography>
 									
 									<div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -126,7 +126,7 @@ function RandomNumberGeneratorView() {
 												},
 												transition: 'all 0.3s ease',
 												'& svg': {
-													animation: isGenerating && doorType === 'main' ? 'spin 1s linear infinite' : 'none',
+													animation: isGenerating && passwordType === 'main' ? 'spin 1s linear infinite' : 'none',
 												},
 												'@keyframes spin': {
 													'0%': { transform: 'rotate(0deg)' },
@@ -135,14 +135,14 @@ function RandomNumberGeneratorView() {
 											}}
 										>
 											<FuseSvgIcon className="text-white" size={28}>
-												{isGenerating && doorType === 'main' ? 'lucide:loader-2' : 'lucide:door-open'}
+												{isGenerating && passwordType === 'main' ? 'lucide:loader-2' : 'lucide:door-open'}
 											</FuseSvgIcon>
 											<div className="text-left flex-1">
 												<Typography className="text-white font-bold text-base">
-													Main Door
+													Cửa Chính
 												</Typography>
 												<Typography variant="caption" className="text-white/80 block">
-													5 digits + !
+													5 chữ số + !
 												</Typography>
 											</div>
 										</Button>
@@ -168,19 +168,19 @@ function RandomNumberGeneratorView() {
 												},
 												transition: 'all 0.3s ease',
 												'& svg': {
-													animation: isGenerating && doorType === 'cabinet' ? 'spin 1s linear infinite' : 'none',
+													animation: isGenerating && passwordType === 'cabinet' ? 'spin 1s linear infinite' : 'none',
 												},
 											}}
 										>
 											<FuseSvgIcon className="text-white" size={28}>
-												{isGenerating && doorType === 'cabinet' ? 'lucide:loader-2' : 'lucide:lock-keyhole'}
+												{isGenerating && passwordType === 'cabinet' ? 'lucide:loader-2' : 'lucide:lock-keyhole'}
 											</FuseSvgIcon>
 											<div className="text-left flex-1">
 												<Typography className="text-white font-bold text-base">
-													Cabinet
+													Tủ
 												</Typography>
 												<Typography variant="caption" className="text-white/80 block">
-													4 digits
+													4 chữ số
 												</Typography>
 											</div>
 										</Button>
@@ -188,7 +188,7 @@ function RandomNumberGeneratorView() {
 								</div>
 
 								{/* Result Display */}
-								{randomNumber && (
+								{password && (
 									<motion.div
 										initial={{ scale: 0.8, opacity: 0 }}
 										animate={{ scale: 1, opacity: 1 }}
@@ -200,9 +200,9 @@ function RandomNumberGeneratorView() {
 												className="mb-2 font-semibold flex items-center gap-2"
 											>
 												<FuseSvgIcon size={18} color="primary">
-													{doorType === 'main' ? 'lucide:door-open' : 'lucide:lock-keyhole'}
+													{passwordType === 'main' ? 'lucide:door-open' : 'lucide:lock-keyhole'}
 												</FuseSvgIcon>
-												{doorType === 'main' ? 'Main Door Code' : 'Cabinet Code'}
+												{passwordType === 'main' ? 'Mã Cửa Chính' : 'Mã Tủ'}
 											</Typography>
 											<div
 												className="p-5 rounded-xl text-center relative overflow-hidden"
@@ -222,12 +222,12 @@ function RandomNumberGeneratorView() {
 												<Typography
 													className="text-white font-bold tracking-wider relative z-10 break-all"
 													sx={{
-														fontSize: randomNumber.length > 10 ? '1.5rem' : '2.25rem',
+														fontSize: password.length > 10 ? '1.5rem' : '2.25rem',
 														textShadow: '0 2px 10px rgba(0,0,0,0.2)',
 														letterSpacing: '0.08em',
 													}}
 												>
-													{randomNumber}
+													{password}
 												</Typography>
 											</div>
 
@@ -249,7 +249,7 @@ function RandomNumberGeneratorView() {
 														},
 													}}
 												>
-													Copy to Clipboard
+													Sao Chép
 												</Button>
 											</div>
 										</div>
@@ -257,7 +257,7 @@ function RandomNumberGeneratorView() {
 								)}
 
 								{/* Info Box */}
-								{!randomNumber && (
+								{!password && (
 									<motion.div
 										initial={{ opacity: 0 }}
 										animate={{ opacity: 1 }}
@@ -270,14 +270,14 @@ function RandomNumberGeneratorView() {
 											</FuseSvgIcon>
 											<div>
 												<Typography variant="caption" className="text-blue-900 dark:text-blue-100 font-medium block">
-													How to use:
+													Hướng dẫn sử dụng:
 												</Typography>
-												<Typography variant="caption" className="text- blue-800 dark:text-blue-200 mt-1 block">
-													1. Click "Main Door" for 5-digit code with !
+												<Typography variant="caption" className="text-blue-800 dark:text-blue-200 mt-1 block">
+													1. Nhấn "Cửa Chính" để tạo mã 5 chữ số kèm dấu !
 													<br />
-													2. Click "Cabinet" for 4-digit code
+													2. Nhấn "Tủ" để tạo mã 4 chữ số
 													<br />
-													3. Copy the generated code if needed
+													3. Nhấn "Sao Chép" để sao chép mã đã tạo
 												</Typography>
 											</div>
 										</div>

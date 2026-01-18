@@ -121,7 +121,7 @@ export function useRoomImages(roomId: string) {
 
 				// Step 2: Upload new images in parallel with allSettled
 				if (newImages.length > 0) {
-					setSyncStatus(`Uploading ${newImages.length} image(s)...`);
+					setSyncStatus(`Đang tải lên ${newImages.length} hình...`);
 					const uploadPromises = newImages.map((img) => uploadSingleImage(img.file!));
 					const uploadResults = await Promise.allSettled(uploadPromises);
 
@@ -132,7 +132,7 @@ export function useRoomImages(roomId: string) {
 
 						return {
 							success: false,
-							error: res.reason?.message || 'Upload failed'
+							error: res.reason?.message || 'Tải lên thất bại'
 						};
 					});
 
@@ -141,7 +141,7 @@ export function useRoomImages(roomId: string) {
 
 					// Step 3: Add uploaded images to room
 					if (uploadedUrls.length > 0) {
-						setSyncStatus(`Adding ${uploadedUrls.length} image(s) to room...`);
+						setSyncStatus(`Đang thêm ${uploadedUrls.length} hình vào phòng...`);
 						result.added = await addImagesToRoom(uploadedUrls);
 					}
 
@@ -150,13 +150,13 @@ export function useRoomImages(roomId: string) {
 
 					if (uploadErrors.length > 0) {
 						result.hasErrors = true;
-						enqueueSnackbar(`${uploadErrors.length} image(s) failed to upload`, { variant: 'warning' });
+						enqueueSnackbar(`${uploadErrors.length} hình tải lên thất bại`, { variant: 'warning' });
 					}
 				}
 
 				// Step 4: Delete removed images in parallel
 				if (removedImages.length > 0) {
-					setSyncStatus(`Deleting ${removedImages.length} image(s)...`);
+					setSyncStatus(`Đang xóa ${removedImages.length} hình...`);
 					const deletePromises = removedImages.map((img) => deleteSingleImage(img));
 					const deleteResults = await Promise.allSettled(deletePromises);
 
@@ -167,7 +167,7 @@ export function useRoomImages(roomId: string) {
 
 						return {
 							success: false,
-							error: res.reason?.message || 'Delete failed'
+							error: res.reason?.message || 'Xóa thất bại'
 						};
 					});
 
@@ -176,7 +176,7 @@ export function useRoomImages(roomId: string) {
 
 					if (deleteErrors.length > 0) {
 						result.hasErrors = true;
-						enqueueSnackbar(`${deleteErrors.length} image(s) failed to delete`, { variant: 'warning' });
+						enqueueSnackbar(`${deleteErrors.length} hình xóa thất bại`, { variant: 'warning' });
 					}
 				}
 
@@ -190,11 +190,11 @@ export function useRoomImages(roomId: string) {
 				if (uploadedCount > 0 || deletedCount > 0) {
 					const messages: string[] = [];
 
-					if (uploadedCount > 0) messages.push(`${uploadedCount} added`);
+					if (uploadedCount > 0) messages.push(`${uploadedCount} đã thêm`);
 
-					if (deletedCount > 0) messages.push(`${deletedCount} removed`);
+					if (deletedCount > 0) messages.push(`${deletedCount} đã xóa`);
 
-					enqueueSnackbar(`Images: ${messages.join(', ')}`, { variant: 'success' });
+					enqueueSnackbar(`Hình ảnh: ${messages.join(', ')}`, { variant: 'success' });
 				}
 
 				setSyncStatus('');
@@ -219,7 +219,7 @@ export function useRoomImages(roomId: string) {
 	const rollbackUploadedImages = useCallback(async (urls: string[]): Promise<void> => {
 		if (urls.length === 0) return;
 
-		setSyncStatus('Rolling back uploaded images...');
+		setSyncStatus('Đang hoàn tác hình đã tải...');
 		setIsSyncing(true);
 
 		try {

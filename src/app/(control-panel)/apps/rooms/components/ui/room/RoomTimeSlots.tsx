@@ -88,7 +88,7 @@ function RoomTimeSlots(props: RoomTimeSlotsProps) {
 				variant="h5"
 				className="mb-4 font-bold"
 			>
-				Time Slots
+				Khung giờ
 			</Typography>
 
 			{/* Date Picker for checking availability */}
@@ -152,12 +152,12 @@ function RoomTimeSlots(props: RoomTimeSlotsProps) {
 										variant="h6"
 										className="font-semibold"
 									>
-										Slot {idx + 1}
+										Khung giờ {idx + 1}
 									</Typography>
 									<Box className="flex gap-1 flex-wrap">
 										{slot.isOvernight && (
 											<Chip
-												label="Overnight"
+												label="Qua đêm"
 												size="small"
 												color="primary"
 												icon={<FuseSvgIcon size={14}>lucide:moon</FuseSvgIcon>}
@@ -221,7 +221,7 @@ function RoomTimeSlots(props: RoomTimeSlotsProps) {
 												onClick={() => handleBookSlot(slot)}
 												startIcon={<FuseSvgIcon size={16}>lucide:calendar-plus</FuseSvgIcon>}
 											>
-												Book Slot
+												Đặt khung giờ
 											</Button>
 										</div>
 									)}

@@ -1,16 +1,12 @@
-import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useEffect } from 'react';
-import { z } from 'zod';
-import _ from 'lodash';
-import TextField from '@mui/material/TextField';
-import FormControl from '@mui/material/FormControl';
-import FormControlLabel from '@mui/material/FormControlLabel';
-import Checkbox from '@mui/material/Checkbox';
-import Link from '@fuse/core/Link';
 import Button from '@mui/material/Button';
-import useJwtAuth from '../useJwtAuth';
+import TextField from '@mui/material/TextField';
+import _ from 'lodash';
+import { useEffect } from 'react';
+import { Controller, useForm } from 'react-hook-form';
 import { useNavigate } from 'react-router';
+import { z } from 'zod';
+import useJwtAuth from '../useJwtAuth';
 
 /**
  * Form Validation Schema
@@ -90,13 +86,18 @@ function JwtSignInForm() {
 					<TextField
 						{...field}
 						className="mb-6"
-						label="User name"
+						label="Tên đăng nhập"
 						autoFocus
 						error={!!errors.username}
 						helperText={errors?.username?.message}
 						variant="outlined"
 						required
 						fullWidth
+						sx={{
+							'& .MuiInputLabel-root, & .MuiInputBase-input': {
+								fontFamily: "'Be Vietnam Pro', Roboto, Arial, sans-serif"
+							}
+						}}
 					/>
 				)}
 			/>
@@ -108,43 +109,21 @@ function JwtSignInForm() {
 					<TextField
 						{...field}
 						className="mb-6"
-						label="Password"
+						label="Mật khẩu"
 						type="password"
 						error={!!errors.password}
 						helperText={errors?.password?.message}
 						variant="outlined"
 						required
 						fullWidth
+						sx={{
+							'& .MuiInputLabel-root, & .MuiInputBase-input': {
+								fontFamily: "'Be Vietnam Pro', Roboto, Arial, sans-serif"
+							}
+						}}
 					/>
 				)}
 			/>
-
-			<div className="flex flex-col items-center justify-center sm:flex-row sm:justify-between">
-				<Controller
-					name="remember"
-					control={control}
-					render={({ field }) => (
-						<FormControl>
-							<FormControlLabel
-								label="Remember me"
-								control={
-									<Checkbox
-										size="small"
-										{...field}
-									/>
-								}
-							/>
-						</FormControl>
-					)}
-				/>
-
-				<Link
-					className="text-md font-medium"
-					to="/#"
-				>
-					Forgot password?
-				</Link>
-			</div>
 
 			<Button
 				variant="contained"
@@ -154,8 +133,11 @@ function JwtSignInForm() {
 				disabled={_.isEmpty(dirtyFields) || !isValid}
 				type="submit"
 				size="large"
+				sx={{
+					fontFamily: "'Be Vietnam Pro', Roboto, Arial, sans-serif"
+				}}
 			>
-				Sign in
+				Đăng nhập
 			</Button>
 		</form>
 	);

@@ -30,7 +30,7 @@ function RoomAmenities(props: RoomAmenitiesProps) {
 				variant="h5"
 				className="mb-4 font-bold"
 			>
-				Amenities
+				Tiện nghi
 			</Typography>
 			<Grid
 				container

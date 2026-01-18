@@ -346,7 +346,7 @@ function RoomView(props: RoomViewProps) {
 					color="text.secondary"
 					variant="h5"
 				>
-					There is no such room!
+					Không tìm thấy phòng!
 				</Typography>
 				<Button
 					className="mt-6"
@@ -355,7 +355,7 @@ function RoomView(props: RoomViewProps) {
 					to="/apps/rooms"
 					color="inherit"
 				>
-					Go to Rooms Page
+					Đi đến trang phòng
 				</Button>
 			</motion.div>
 		);
@@ -371,7 +371,7 @@ function RoomView(props: RoomViewProps) {
 						to="/apps/rooms"
 						startIcon={<FuseSvgIcon>lucide:arrow-left</FuseSvgIcon>}
 					>
-						Back to Rooms
+						Quay lại danh sách phòng
 					</Button>
 					<div className="flex gap-2">
 						{isEditMode ? (
@@ -388,7 +388,7 @@ function RoomView(props: RoomViewProps) {
 										}
 									}}
 								>
-									Cancel
+									Hủy
 								</Button>
 								<Button
 									variant="contained"
@@ -401,7 +401,7 @@ function RoomView(props: RoomViewProps) {
 									}
 									disabled={isSaving || isSyncing}
 								>
-									{isSyncing && syncStatus ? syncStatus : isSaving ? 'Saving...' : 'Save Changes'}
+									{isSyncing && syncStatus ? syncStatus : isSaving ? 'Đang lưu...' : 'Lưu thay đổi'}
 								</Button>
 							</>
 						) : (
@@ -414,7 +414,7 @@ function RoomView(props: RoomViewProps) {
 								}}
 								startIcon={<FuseSvgIcon>lucide:edit</FuseSvgIcon>}
 							>
-								Edit
+								Chỉnh sửa
 							</Button>
 						)}
 					</div>
@@ -451,7 +451,7 @@ function RoomView(props: RoomViewProps) {
 									</div>
 								</div>
 								<Chip
-									label={room?.isActive ? 'ACTIVE' : 'INACTIVE'}
+									label={room?.isActive ? 'HOẠT ĐỘNG' : 'NGỪNG HOẠT ĐỘNG'}
 									color={statusColor}
 									size="medium"
 									className="mb-4"
@@ -493,7 +493,7 @@ function RoomView(props: RoomViewProps) {
 							variant="h4"
 							className="mb-6 font-bold"
 						>
-							{isCreateMode ? 'Add Room' : 'Edit Room'}
+							{isCreateMode ? 'Thêm phòng' : 'Chỉnh sửa phòng'}
 						</Typography>
 
 						<div className="space-y-6">
@@ -503,7 +503,7 @@ function RoomView(props: RoomViewProps) {
 									variant="h6"
 									className="mb-4 font-semibold"
 								>
-									Basic Information
+									Thông tin cơ bản
 								</Typography>
 								<RoomBasicInfoForm
 									control={control}
@@ -519,7 +519,7 @@ function RoomView(props: RoomViewProps) {
 									variant="h6"
 									className="mb-4 font-semibold"
 								>
-									Images
+									Hình ảnh
 								</Typography>
 								<RoomImagesForm control={control} />
 							</div>
@@ -532,7 +532,7 @@ function RoomView(props: RoomViewProps) {
 									variant="h6"
 									className="mb-4 font-semibold"
 								>
-									Amenities
+									Tiện nghi
 								</Typography>
 								<RoomAmenitiesForm
 									control={control}

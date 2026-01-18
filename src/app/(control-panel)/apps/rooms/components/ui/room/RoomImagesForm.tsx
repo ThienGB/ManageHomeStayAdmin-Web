@@ -108,19 +108,19 @@ function RoomImagesForm(props: RoomImagesFormProps) {
 						variant="body1"
 						fontWeight="medium"
 					>
-						Click or drag images here to add
+						Nhấp hoặc kéo hình ảnh vào đây
 					</Typography>
 					<Typography
 						variant="body2"
 						color="text.secondary"
 					>
-						Supports: JPG, PNG, GIF, WebP
+						Hỗ trợ: JPG, PNG, GIF, WebP
 					</Typography>
 					<Typography
 						variant="caption"
 						color="warning.main"
 					>
-						Images will be uploaded when you save
+						Hình ảnh sẽ được tải lên khi bạn lưu
 					</Typography>
 				</Box>
 			</Paper>
@@ -148,7 +148,7 @@ function RoomImagesForm(props: RoomImagesFormProps) {
 								{/* Local file indicator */}
 								{field.isLocal && (
 									<div className="absolute top-2 right-2 rounded bg-yellow-500 px-2 py-0.5 text-xs text-white">
-										Pending
+										Chờ xử lý
 									</div>
 								)}
 								{/* Overlay on hover */}
@@ -178,7 +178,7 @@ function RoomImagesForm(props: RoomImagesFormProps) {
 					color="text.secondary"
 					className="text-center"
 				>
-					No images added yet
+					Chưa có hình ảnh nào
 				</Typography>
 			)}
 		</div>

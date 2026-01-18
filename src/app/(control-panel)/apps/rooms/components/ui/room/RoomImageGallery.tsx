@@ -63,7 +63,7 @@ function RoomImageGallery(props: RoomImageGalleryProps) {
 							variant="body2"
 							fontWeight="medium"
 						>
-							Click to view gallery
+							Nhấp để xem thư viện
 						</Typography>
 					</div>
 				</div>

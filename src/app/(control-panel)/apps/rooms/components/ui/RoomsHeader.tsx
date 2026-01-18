@@ -1,9 +1,9 @@
 import FuseSvgIcon from '@fuse/core/FuseSvgIcon';
 import NavLinkAdapter from '@fuse/core/NavLinkAdapter';
 import {
-	IconButton,
-	InputAdornment,
-	TextField
+    IconButton,
+    InputAdornment,
+    TextField
 } from '@mui/material';
 import Button from '@mui/material/Button';
 import Typography from '@mui/material/Typography';
@@ -37,7 +37,7 @@ function RoomsHeader({ totalResults, isLoading, onSearchChange }: RoomsHeaderPro
 							animate={{ x: 0, transition: { delay: 0.2 } }}
 						>
 							<Typography className="text-4xl leading-none font-extrabold tracking-tight">
-								Rooms
+								Phòng
 							</Typography>
 						</motion.span>
 						{totalResults !== undefined && (
@@ -51,13 +51,13 @@ function RoomsHeader({ totalResults, isLoading, onSearchChange }: RoomsHeaderPro
 								>
 									<FuseSvgIcon size={16}>lucide:list-filter</FuseSvgIcon>
 									{isLoading ? (
-										'Loading...'
+										'Đang tải...'
 									) : (
 										<>
 											<span className="text-primary font-semibold">
 												{totalResults.toLocaleString()}
 											</span>
-											<span>{totalResults === 1 ? 'result' : 'results'} found</span>
+											<span>kết quả tìm thấy</span>
 										</>
 									)}
 								</Typography>
@@ -73,7 +73,7 @@ function RoomsHeader({ totalResults, isLoading, onSearchChange }: RoomsHeaderPro
 							animate={{ opacity: 1, x: 0, transition: { delay: 0.2 } }}
 						>
 							<TextField
-								placeholder="Search rooms..."
+								placeholder="Tìm kiếm phòng..."
 								value={searchInput}
 								onChange={(e) => handleSearchChange(e.target.value)}
 								size="medium"
@@ -118,7 +118,7 @@ function RoomsHeader({ totalResults, isLoading, onSearchChange }: RoomsHeaderPro
 								to="/apps/rooms/add"
 								startIcon={<FuseSvgIcon>lucide:plus</FuseSvgIcon>}
 							>
-								Add
+								Thêm
 							</Button>
 						</motion.div>
 					</div>

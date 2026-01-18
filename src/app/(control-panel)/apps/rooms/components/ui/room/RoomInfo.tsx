@@ -25,7 +25,7 @@ function RoomInfo(props: RoomInfoProps) {
 				variant="h5"
 				className="mb-4 font-bold"
 			>
-				About This Room
+				Giới thiệu về phòng
 			</Typography>
 			<Typography
 				variant="body1"
@@ -43,7 +43,7 @@ function RoomInfo(props: RoomInfoProps) {
 							lucide:user
 						</FuseSvgIcon>
 					</div>
-					<Typography variant="body2">{capacity} guests</Typography>
+					<Typography variant="body2">{capacity} khách</Typography>
 				</div>
 				<div className="flex items-center gap-2">
 					<div className="bg-primary/10 flex h-8 w-8 items-center justify-center rounded-full">
@@ -54,7 +54,7 @@ function RoomInfo(props: RoomInfoProps) {
 							lucide:bed
 						</FuseSvgIcon>
 					</div>
-					<Typography variant="body2">{bed} beds</Typography>
+					<Typography variant="body2">{bed} giường</Typography>
 				</div>
 				<div className="flex items-center gap-2">
 					<div className="bg-primary/10 flex h-8 w-8 items-center justify-center rounded-full">
@@ -74,7 +74,7 @@ function RoomInfo(props: RoomInfoProps) {
 						variant="body2"
 						color="text.secondary"
 					>
-						Hourly Rate:
+						Giá theo giờ:
 					</Typography>
 					<Typography
 						variant="body1"
@@ -91,7 +91,7 @@ function RoomInfo(props: RoomInfoProps) {
 						variant="body2"
 						color="text.secondary"
 					>
-						Overnight Rate:
+						Giá qua đêm:
 					</Typography>
 					<Typography
 						variant="body1"
