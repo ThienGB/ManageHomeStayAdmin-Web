@@ -79,5 +79,17 @@ export const roomsApi = {
 	 */
 	deleteRoomImage: async (roomId: string, imageId: string): Promise<void> => {
 		await mainApi.delete(`rooms/${roomId}/images/${imageId}`);
+	},
+
+	/**
+	 * Update amenities for a room
+	 * @param roomId - The room ID
+	 * @param amenities - Array of amenities with their highlight status
+	 */
+	updateRoomAmenities: async (
+		roomId: string,
+		amenities: Array<{ amenityId: string; isHighlight: boolean }>
+	): Promise<void> => {
+		await mainApi.put(`rooms/${roomId}/amenities`, { json: { amenities } });
 	}
 };

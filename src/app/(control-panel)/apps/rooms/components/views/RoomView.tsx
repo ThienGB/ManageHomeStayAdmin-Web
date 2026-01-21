@@ -25,19 +25,20 @@ import { useTimeSlots } from '../../api/hooks/useTimeSlots';
 import { useUpdateRoom } from '../../api/hooks/useUpdateRoom';
 import { useUpdateTimeSlot } from '../../api/hooks/useUpdateTimeSlot';
 import RoomModel from '../../api/models/RoomModel';
-import { RoomImage } from '../../api/types';
+import { RoomImage, RoomType } from '../../api/types';
 import useRoomImages, { FormImage } from '../../hooks/useRoomImages';
 
 // Import refactored components
+import { useUpdateRoomAmenities } from '../../api/hooks/useUpdateRoomAmenities';
 import {
-    RoomAmenities,
-    RoomAmenitiesForm,
-    RoomBasicInfoForm,
-    RoomImageGallery,
-    RoomImagesForm,
-    RoomInfo,
-    RoomTimeSlots,
-    RoomTimeSlotsForm
+	RoomAmenities,
+	RoomAmenitiesForm,
+	RoomBasicInfoForm,
+	RoomImageGallery,
+	RoomImagesForm,
+	RoomInfo,
+	RoomTimeSlots,
+	RoomTimeSlotsForm
 } from '../ui/room';
 
 const schema = z
@@ -48,7 +49,8 @@ const schema = z
 		capacity: z.number().min(1, 'Capacity must be at least 1'),
 		numberOfBeds: z.number().min(0, 'Bed count must be positive'),
 		area: z.number().min(0, 'Area must be positive'),
-		amenityIds: z.array(z.string()).optional()
+		amenityIds: z.array(z.string()).optional(),
+		roomType: z.nativeEnum(RoomType).optional()
 	})
 	.passthrough();
 
@@ -82,6 +84,7 @@ function RoomView(props: RoomViewProps) {
 	);
 	const [currentImageIndex, setCurrentImageIndex] = useState(0);
 	const [amenitySearch, setAmenitySearch] = useState('');
+	const [originalAmenityIds, setOriginalAmenityIds] = useState<string[]>([]);
 
 	const { data: timeSlots } = useTimeSlots(roomId);
 	const { data: amenities } = useAmenities(amenitySearch);
@@ -90,6 +93,7 @@ function RoomView(props: RoomViewProps) {
 	const { mutate: createTimeSlot } = useCreateTimeSlot();
 	const { mutate: updateTimeSlot } = useUpdateTimeSlot();
 	const { mutate: deleteTimeSlot } = useDeleteTimeSlot();
+	const { mutate: updateRoomAmenities } = useUpdateRoomAmenities();
 
 	// Image management hook
 	const { syncImages, rollbackUploadedImages, isSyncing, syncStatus } = useRoomImages(roomId);
@@ -140,6 +144,9 @@ function RoomView(props: RoomViewProps) {
 					? room.amenities.map((a: any) => (typeof a === 'string' ? a : a.id || a._id || a))
 					: []
 			};
+
+			// Save original amenity IDs for comparison
+			setOriginalAmenityIds(normalized.amenityIds);
 
 			const normalizeTime = (timeString?: string): string | undefined => {
 				if (!timeString) return undefined;
@@ -227,7 +234,8 @@ function RoomView(props: RoomViewProps) {
 					area: data.area,
 					images: uploadedImages,
 					isActive: data.isActive,
-					amenityIds: data.amenityIds || []
+					amenityIds: data.amenityIds || [],
+					roomType: data.roomType
 				};
 
 				createRoom(roomData, {
@@ -263,7 +271,8 @@ function RoomView(props: RoomViewProps) {
 					area: data.area,
 					isActive: data.isActive,
 					hourlyRate: data.hourlyRate,
-					overnightRate: data.overnightRate
+					overnightRate: data.overnightRate,
+					roomType: data.roomType
 				};
 
 				// First update the room basic info
@@ -271,18 +280,53 @@ function RoomView(props: RoomViewProps) {
 					{ roomId, data: roomData },
 					{
 						onSuccess: async () => {
-							// After room update success, sync image changes
-							const currentImages: FormImage[] = data.images || [];
-							const originalImages: RoomImage[] = room?.images || [];
+						// After room update success, sync image changes
+						const currentImages: FormImage[] = data.images || [];
+						const originalImages: RoomImage[] = room?.images || [];
 
-							// Use the hook for granular image sync with Promise.allSettled
-							await syncImages(currentImages, originalImages);
+						// Use the hook for granular image sync with Promise.allSettled
+						await syncImages(currentImages, originalImages);
 
+						// Check if amenities have changed
+						const currentAmenityIds = data.amenityIds || [];
+						const amenitiesChanged =
+							currentAmenityIds.length !== originalAmenityIds.length ||
+							currentAmenityIds.some((id: string) => !originalAmenityIds.includes(id)) ||
+							originalAmenityIds.some((id) => !currentAmenityIds.includes(id));
+
+						// If amenities changed, update them via API
+						if (amenitiesChanged) {
+							// Map amenityIds to the format expected by API
+							const amenitiesPayload = currentAmenityIds.map((id: string) => ({
+								amenityId: id,
+								isHighlight: false // Default to false, can be enhanced later
+							}));
+
+							// Call update amenities API
+							updateRoomAmenities(
+								{ roomId, amenities: amenitiesPayload },
+								{
+									onSuccess: () => {
+										setIsSaving(false);
+										setIsEditMode(false);
+										navigate(`/apps/rooms/${roomId}`);
+									},
+									onError: () => {
+										setIsSaving(false);
+										// Even if amenities update fails, still navigate away since room was updated
+										setIsEditMode(false);
+										navigate(`/apps/rooms/${roomId}`);
+									}
+								}
+							);
+						} else {
+							// No amenity changes, just navigate
 							setIsSaving(false);
 							setIsEditMode(false);
 							navigate(`/apps/rooms/${roomId}`);
-						},
-						onError: () => {
+						}
+					},
+					onError: () => {
 							setIsSaving(false);
 						}
 					}
@@ -421,71 +465,75 @@ function RoomView(props: RoomViewProps) {
 				</div>
 
 				{!isEditMode ? (
-					/* VIEW MODE */
-					<div className="w-full space-y-8">
-						{/* Hero Section */}
-						<Paper
-							elevation={0}
-							className="overflow-hidden rounded-2xl"
-						>
-							{/* Image Gallery */}
-							{room?.images && room.images.length > 0 && (
-								<RoomImageGallery
-									images={room.images}
-									roomName={room?.name || ''}
-									currentImageIndex={currentImageIndex}
-									onImageIndexChange={setCurrentImageIndex}
-								/>
-							)}
+					<>
+						{/* VIEW MODE - 2 Column Layout */}
+						<Grid container spacing={4}>
+							{/* Left Column - Image Gallery */}
+							<Grid size={{ xs: 12, md: 6, lg: 5 }}>
+								<Paper
+									elevation={0}
+									className="sticky top-6 overflow-hidden rounded-2xl"
+								>
+									{/* Image Gallery */}
+									{room?.images && room.images.length > 0 && (
+										<RoomImageGallery
+											images={room.images}
+											roomName={room?.name || ''}
+											currentImageIndex={currentImageIndex}
+											onImageIndexChange={setCurrentImageIndex}
+										/>
+									)}
+								</Paper>
+							</Grid>
 
-							{/* Title Section */}
-							<div className="p-6">
-								<div className="mb-4 flex items-start justify-between">
-									<div className="flex-1">
-										<Typography
-											variant="h3"
-											className="mb-2 font-bold"
-										>
-											{room?.name}
-										</Typography>
-									</div>
+							{/* Right Column - Room Information */}
+							<Grid size={{ xs: 12, md: 6, lg: 7 }}>
+								<div className="space-y-6">
+									{/* Title and Status */}
+									<Paper elevation={0} className="rounded-2xl p-6">
+										<div className="mb-4 flex items-start justify-between">
+											<div className="flex-1">
+												<Typography
+													variant="h3"
+													className="mb-2 font-bold"
+												>
+													{room?.name}
+												</Typography>
+											</div>
+										</div>
+										<Chip
+											label={room?.isActive ? 'HOẠT ĐỘNG' : 'NGỪNG HOẠT ĐỘNG'}
+											color={statusColor}
+											size="medium"
+										/>
+									</Paper>
+
+									{/* About This Room */}
+									<RoomInfo
+										name={room?.name}
+										description={room?.description}
+										capacity={room?.capacity}
+										bed={room?.bed}
+										area={room?.area}
+										hourlyRate={room?.hourlyRate}
+										overnightRate={room?.overnightRate}
+									/>
+
+									{/* Amenities */}
+									{room?.amenities && room.amenities.length > 0 && (
+										<RoomAmenities amenities={room.amenities} />
+									)}
 								</div>
-								<Chip
-									label={room?.isActive ? 'HOẠT ĐỘNG' : 'NGỪNG HOẠT ĐỘNG'}
-									color={statusColor}
-									size="medium"
-									className="mb-4"
-								/>
-							</div>
-						</Paper>
-
-						<Grid
-							container
-							spacing={4}
-							className="w-full"
-						>
-							<Grid size={{ sm: 12, md: 12 }}>
-								{/* About This Room */}
-								<RoomInfo
-									name={room?.name}
-									description={room?.description}
-									capacity={room?.capacity}
-									bed={room?.bed}
-									area={room?.area}
-									hourlyRate={room?.hourlyRate}
-									overnightRate={room?.overnightRate}
-								/>
-
-								{/* Amenities */}
-								{room?.amenities && room.amenities.length > 0 && (
-									<RoomAmenities amenities={room.amenities} />
-								)}
-
-								{/* TimeSlots Section */}
-								{timeSlots && timeSlots.length > 0 && <RoomTimeSlots timeSlots={timeSlots} roomId={roomId} />}
 							</Grid>
 						</Grid>
-					</div>
+
+						{/* TimeSlots Section - Full Width */}
+						{timeSlots && timeSlots.length > 0 && (
+							<div className="mt-6">
+								<RoomTimeSlots timeSlots={timeSlots} roomId={roomId} />
+							</div>
+						)}
+					</>
 				) : (
 					/* EDIT MODE */
 					<Paper className="p-8">

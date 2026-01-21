@@ -1,8 +1,9 @@
 'use client';
 
-import { Checkbox, FormControlLabel, InputAdornment, TextField } from '@mui/material';
+import { Checkbox, FormControlLabel, InputAdornment, MenuItem, TextField } from '@mui/material';
 import Grid from '@mui/material/Grid';
 import { Control, Controller, FieldErrors } from 'react-hook-form';
+import { RoomType } from '../../../api/types';
 
 type RoomBasicInfoFormProps = {
 	control: Control<any>;
@@ -127,6 +128,27 @@ function RoomBasicInfoForm(props: RoomBasicInfoFormProps) {
 					)}
 				/>
 			</Grid>
+			<Grid size={{ sm: 12, md: 12 }}>
+			<Controller
+				name="roomType"
+				control={control}
+				render={({ field }) => (
+					<TextField
+						{...field}
+						select
+						label="Loại phòng"
+						fullWidth
+						error={!!errors.roomType}
+						helperText={errors.roomType?.message as string}
+					>
+						<MenuItem value={RoomType.NORMAL}>Thường</MenuItem>
+						<MenuItem value={RoomType.STANDARD}>Tiêu chuẩn</MenuItem>
+						<MenuItem value={RoomType.VIP}>VIP</MenuItem>
+						<MenuItem value={RoomType.PREMIUM}>Cao cấp</MenuItem>
+					</TextField>
+				)}
+			/>
+		</Grid>
 			<Grid size={{ sm: 12, md: 12 }}>
 				<Controller
 					name="isActive"

@@ -23,15 +23,19 @@ function RoomsTable({ searchTerm = '' }: RoomsTableProps) {
 	});
 	const allRooms = data?.data?.content || [];
 
-	// Filter rooms locally based on search term
+	// Filter and sort rooms locally based on search term
 	const rooms = useMemo(() => {
-		if (!searchTerm) return allRooms;
-		
-		const lowerSearch = searchTerm.toLowerCase();
-		return allRooms.filter((room) =>
-			room.name?.toLowerCase().includes(lowerSearch) ||
-			room.description?.toLowerCase().includes(lowerSearch)
-		);
+		let result = [...allRooms];
+
+		if (searchTerm) {
+			const lowerSearch = searchTerm.toLowerCase();
+			result = result.filter((room) =>
+				room.name?.toLowerCase().includes(lowerSearch) ||
+				room.description?.toLowerCase().includes(lowerSearch)
+			);
+		}
+
+		return result.sort((a, b) => a.name.localeCompare(b.name));
 	}, [allRooms, searchTerm]);
 
 	const columns = useMemo<MRT_ColumnDef<Room>[]>(

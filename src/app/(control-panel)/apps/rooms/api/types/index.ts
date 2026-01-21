@@ -1,3 +1,10 @@
+export enum RoomType {
+	NORMAL = 'NORMAL',
+	STANDARD = 'STANDARD',
+	VIP = 'VIP',
+	PREMIUM = 'PREMIUM'
+}
+
 export type RoomImage = {
 	id: string;
 	isDeleted?: boolean;
@@ -14,6 +21,7 @@ export type RoomAmenity = {
 	name: string;
 	icon?: string;
 	description?: string;
+	isHighlight?: boolean;
 };
 
 export type Room = {
@@ -31,6 +39,7 @@ export type Room = {
 	amenities?: RoomAmenity[];
 	hourlyRate?: number;
 	overnightRate?: number;
+	roomType?: RoomType;
 };
 
 export type RoomCategory = {

@@ -1,16 +1,15 @@
+import FuseSvgIcon from '@fuse/core/FuseSvgIcon';
+import useNavigate from '@fuse/hooks/useNavigate';
+import useParams from '@fuse/hooks/useParams';
 import Button from '@mui/material/Button';
 import Typography from '@mui/material/Typography';
 import { motion } from 'motion/react';
 import { useFormContext } from 'react-hook-form';
-import useParams from '@fuse/hooks/useParams';
-import _ from 'lodash';
-import FuseSvgIcon from '@fuse/core/FuseSvgIcon';
 import PageBreadcrumb from 'src/components/PageBreadcrumb';
-import useNavigate from '@fuse/hooks/useNavigate';
-import { Amenity } from '../../api/types';
 import { useCreateAmenity } from '../../api/hooks/useCreateAmenity';
-import { useUpdateAmenity } from '../../api/hooks/useUpdateAmenity';
 import { useDeleteAmenity } from '../../api/hooks/useDeleteAmenity';
+import { useUpdateAmenity } from '../../api/hooks/useUpdateAmenity';
+import { Amenity } from '../../api/types';
 
 function AmenityHeader() {
 	const routeParams = useParams<{ amenityId: string }>();
@@ -22,7 +21,7 @@ function AmenityHeader() {
 
 	const methods = useFormContext();
 	const { formState, watch, getValues } = methods;
-	const { isValid, dirtyFields } = formState;
+	const { isValid, isDirty } = formState;
 
 	const navigate = useNavigate();
 
@@ -92,7 +91,7 @@ function AmenityHeader() {
 								className="mx-1 whitespace-nowrap"
 								variant="contained"
 								color="secondary"
-								disabled={_.isEmpty(dirtyFields)}
+								disabled={!isDirty}
 								onClick={handleSaveAmenity}
 							>
 								Save
@@ -103,7 +102,7 @@ function AmenityHeader() {
 							className="mx-1 whitespace-nowrap"
 							variant="contained"
 							color="secondary"
-							disabled={_.isEmpty(dirtyFields)}
+							disabled={!isDirty}
 							onClick={handleCreateAmenity}
 						>
 							Add

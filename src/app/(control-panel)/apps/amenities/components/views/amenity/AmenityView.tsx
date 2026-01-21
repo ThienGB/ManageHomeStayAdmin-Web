@@ -49,7 +49,7 @@ function AmenityView() {
 		resolver: zodResolver(schema)
 	});
 
-	const { reset, watch, control, formState } = methods;
+	const { reset, watch, control, formState, setValue } = methods;
 	const { errors } = formState;
 
 	const form = watch();
@@ -136,13 +136,15 @@ function AmenityView() {
 							<Controller
 								name="icon"
 								control={control}
-								render={({ field: { onChange, value } }) => (
+								render={({ field: { value } }) => (
 									<IconSearchField
 										label="Biểu tượng"
-										value={value}
-										onChange={onChange}
+										value={value || ''}
+										onChange={(newValue) => {
+											setValue('icon', newValue, { shouldValidate: true, shouldDirty: true });
+										}}
 										placeholder="Tìm kiếm biểu tượng (ví dụ: home, wifi, user)"
-										iconSet="heroicons"
+										iconSet="lucide"
 										error={!!errors.icon}
 										helperText={errors?.icon?.message as string}
 									/>
